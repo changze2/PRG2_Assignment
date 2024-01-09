@@ -1,14 +1,38 @@
 ﻿// See https://aka.ms/new-console-template for more information
-/* Lim Chang Ze - S10255850
- * Elvis Chan Jun Yu - S10259428
- * Assignment 1 */
+
 
 using Assignment1_ChangZe_Elvis;
 
-Console.Write("Enter option: ");
-string option = Console.ReadLine();
-Console.Write("Enter scoops: ");
-int scoops = Convert.ToInt32(Console.ReadLine());
+Dictionary<int, Customer> customerDict = new Dictionary<int, Customer>();
 
-IceCream icecream = new Cup(option, scoops);
-Console.WriteLine(icecream.ToString());
+using (StreamReader sr = new StreamReader("customers.csv"))
+{
+    string? s = sr.ReadLine();
+    if (s != null) { }
+    while ((s = sr.ReadLine()) != null)
+    {
+        string[] line = s.Split(',');
+        string name = line[0];
+        int id = Convert.ToInt32(line[1]);
+        DateOnly dob = DateOnly.FromDateTime(Convert.ToDateTime(line[2]));
+        Customer customer = new Customer(name, id, dob);
+        customerDict.Add(id, customer);
+    }
+}
+
+void CustomerInfo()
+{
+    foreach (Customer customer in customerDict.Values)
+    {
+        Console.WriteLine(customer.ToString());
+    }
+}
+
+CustomerInfo();
+//Console.Write("Enter option: ");
+//string option = Console.ReadLine();
+//Console.Write("Enter scoops: ");
+//int scoops = Convert.ToInt32(Console.ReadLine());
+
+//IceCream icecream = new Cup(option, scoops);
+//Console.WriteLine(icecream.ToString());

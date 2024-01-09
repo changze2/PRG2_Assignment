@@ -25,7 +25,7 @@ namespace Assignment1_ChangZe_Elvis
         }
         public void RedeemPoints(int redeem)
         {
-            Order.CalculateTotal() -= (redeem * 0.02);
+            //Order.CalculateTotal() -= (redeem * 0.02);
         }
     }
 }
