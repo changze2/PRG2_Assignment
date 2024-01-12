@@ -14,7 +14,7 @@ using (StreamReader sr = new StreamReader("customers.csv"))
         string[] line = s.Split(',');
         string name = line[0];
         int id = Convert.ToInt32(line[1]);
-        DateOnly dob = DateOnly.FromDateTime(Convert.ToDateTime(line[2]));
+        string dob = line[2];
         Customer customer = new Customer(name, id, dob);
         customerDict.Add(id, customer);
     }

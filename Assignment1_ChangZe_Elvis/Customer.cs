@@ -16,11 +16,11 @@ namespace Assignment1_ChangZe_Elvis
         public PointCard Rewards { get; set; }
 
         public Customer() { }
-        public Customer(string name, int memberId, DateOnly dob)
+        public Customer(string name, int memberId, string dob)
         {
             Name = name;
             MemberId = memberId;
-            Dob = dob;
+            Dob = DateOnly.FromDateTime(DateTime.Parse(dob));
         }
 
         public Order MakeOrder()
@@ -35,18 +35,14 @@ namespace Assignment1_ChangZe_Elvis
         public bool IsBirthday()
         {
             DateTime dateTime = DateTime.Now;
-            int userBirthDate = BirthDate;
-            int userBirthMonth = BirthMonth;
+            int userBirthDate = Dob.Day;
+            int userBirthMonth = Dob.Month;
             int day = dateTime.Day;
             int month = dateTime.Month;
 
-            if (day == BirthDate && month != BirthMonth)
+            if (day == userBirthDate && month == userBirthMonth)
             {
                 return true;
-            }
-            else if (day != BirthDate && month == BirthMonth)
-            {
-                return false;
             }
             return false;
         }
