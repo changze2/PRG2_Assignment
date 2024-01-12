@@ -27,5 +27,15 @@ namespace Assignment1_ChangZe_Elvis
         {
             Order.CalculateTotal() -= (redeem * 0.02);
         }
+
+        public void Punch()
+        {
+
+        }
+
+        public override string ToString()
+        {
+            return $"Tier: {Tier}, Points: {Points}";
+        }
     }
 }

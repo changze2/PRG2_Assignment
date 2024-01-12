@@ -31,5 +31,29 @@ namespace Assignment1_ChangZe_Elvis
             Order order = new Order();
             return order;
         } 
+
+        public bool IsBirthday()
+        {
+            DateTime dateTime = DateTime.Now;
+            int userBirthDate = BirthDate;
+            int userBirthMonth = BirthMonth;
+            int day = dateTime.Day;
+            int month = dateTime.Month;
+
+            if (day == BirthDate && month != BirthMonth)
+            {
+                return true;
+            }
+            else if (day != BirthDate && month == BirthMonth)
+            {
+                return false;
+            }
+            return false;
+        }
+
+        public override string ToString()
+        {
+            return $"Name: {Name}, Member ID: {Memberid}";
+        }
     }
 }

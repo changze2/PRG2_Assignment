@@ -23,5 +23,6 @@ namespace Assignment1_ChangZe_Elvis
         public override string ToString()
         {
             return $"Type: {Type}\tPremium: {Premium}\tQuality: {Quality}";
+        }
     }
 }

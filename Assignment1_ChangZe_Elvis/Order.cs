@@ -24,6 +24,16 @@ namespace Assignment1_ChangZe_Elvis
         {
 
         }
+
+        public void AddIceCream(IceCream iceCream)
+        {
+
+        }
+
+        public void DeleteIceCream(int position)
+        {
+
+        }
         public double CalculateTotal()
         {
             double total = 0;
@@ -32,6 +42,11 @@ namespace Assignment1_ChangZe_Elvis
                 total += iceCream.CalculatePrice();
             }
             return total;
+        }
+
+        public override string ToString()
+        {
+            return $"Order id: {Id}";
         }
     }
 }
