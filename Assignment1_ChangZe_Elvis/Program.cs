@@ -36,7 +36,38 @@ CustomerInfo();
 
 //IceCream icecream = new Cup(option, scoops);
 //Console.WriteLine(icecream.ToString());
+void CurrentOrders()
+{
+    Customer customer1 = new Customer("Amelia", 666888, "01/01/1998");
+    customer1.Rewards = new PointCard { Tier = "Gold", Points = 150 };
+    customer1.CurrentOrder = new Order(1, DateTime.Now);
 
+    Customer customer2 = new Customer("Bob", 888666, "01/02/2000");
+    customer2.Rewards = new PointCard { Tier = "Ordinary", Points = 5 };
+    customer2.CurrentOrder = new Order(2, DateTime.Now);
+
+    Customer customer3 = new Customer("Cody", 898989, "02/02/2001");
+    customer3.Rewards = new PointCard { Tier = "Silver", Points = 65 };
+
+    DisplayCurrentOrders(customer1);
+    DisplayCurrentOrders(customer2);
+    DisplayCurrentOrders(customer3);
+}
+
+void DisplayCurrentOrders(Customer customer)
+{
+    Console.WriteLine($"Customer: {customer.Name}\t Tier: {customer.Rewards.Tier}");
+
+    if (customer.CurrentOrder != null)
+    {
+        Console.WriteLine($"Order ID: {customer.CurrentOrder.Id}\t Order Date: {customer.CurrentOrder.TimeReceived.ToString("dd/MM/yyyy HH:mm:ss")}");
+    }
+    else
+    {
+        Console.WriteLine("No current order");
+    }
+}
+CurrentOrders();
 void RegisterCustomer()
 {
     Console.Write("Enter customer name: ");
