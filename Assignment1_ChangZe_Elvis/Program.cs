@@ -36,3 +36,29 @@ CustomerInfo();
 
 //IceCream icecream = new Cup(option, scoops);
 //Console.WriteLine(icecream.ToString());
+
+void RegisterCustomer()
+{
+    Console.Write("Enter customer name: ");
+    string name = Console.ReadLine();
+    Console.Write("Enter customer id number (e.g 650992): ");
+    int id  = Convert.ToInt32(Console.ReadLine());
+    Console.Write("Enter date of birth (DD-MM-YYYY): ");
+    string dobString = Console.ReadLine();
+    Customer newCustomer = new Customer(name, id, dobString);
+    PointCard newPointCard = new PointCard();
+    newCustomer.Rewards = newPointCard;
+    Console.WriteLine("Registration Successful!");
+    AppendToCsvFile(newCustomer);
+
+}
+//ELVIS: I CREATED ANOTHER METHOD FOR APPENDING NEW CUSTOMER INFORMATION
+//       INTO THE CSV FILE
+void AppendToCsvFile(Customer customer)
+{
+    string filePath = "customers.csv";
+    string csvLine = $"{customer.Name},{customer.MemberId},{customer.Dob}";
+    File.AppendAllLines(filePath, new[] { csvLine });
+}
+
+RegisterCustomer();
