@@ -4,6 +4,8 @@
 using Assignment1_ChangZe_Elvis;
 
 Dictionary<int, Customer> customerDict = new Dictionary<int, Customer>();
+Queue <Order> goldOrderQueue = new Queue<Order>();
+Queue <Order> orderQueue = new Queue<Order>();
 
 using (StreamReader sr = new StreamReader("customers.csv"))
 {
@@ -13,6 +15,7 @@ using (StreamReader sr = new StreamReader("customers.csv"))
     {
         string[] line = s.Split(',');
         string name = line[0];
+        Console.WriteLine(line[1]);
         int id = Convert.ToInt32(line[1]);
         string dob = line[2];
         Customer customer = new Customer(name, id, dob);
@@ -20,6 +23,13 @@ using (StreamReader sr = new StreamReader("customers.csv"))
     }
 }
 
+void Menu()
+{
+    Console.WriteLine(
+        "====================" +
+        "\nMenu" +
+        "\n====================");
+}
 void CustomerInfo()
 {
     foreach (Customer customer in customerDict.Values)
@@ -36,6 +46,7 @@ CustomerInfo();
 
 //IceCream icecream = new Cup(option, scoops);
 //Console.WriteLine(icecream.ToString());
+
 void CurrentOrders()
 {
     Customer customer1 = new Customer("Amelia", 666888, "01/01/1998");
@@ -80,6 +91,7 @@ void RegisterCustomer()
     PointCard newPointCard = new PointCard();
     newCustomer.Rewards = newPointCard;
     Console.WriteLine("Registration Successful!");
+    customerDict.Add(id, newCustomer);
     AppendToCsvFile(newCustomer);
 
 }
@@ -87,9 +99,14 @@ void RegisterCustomer()
 //       INTO THE CSV FILE
 void AppendToCsvFile(Customer customer)
 {
-    string filePath = "customers.csv";
+    string relativePath = @"..\..\..\customers.csv";
+    string filePath = Path.GetFullPath(relativePath, Directory.GetCurrentDirectory());
     string csvLine = $"{customer.Name},{customer.MemberId},{customer.Dob}";
     File.AppendAllLines(filePath, new[] { csvLine });
 }
 
 RegisterCustomer();
+
+Menu();
+
+CustomerInfo();
