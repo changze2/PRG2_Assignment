@@ -46,7 +46,7 @@ namespace Assignment1_ChangZe_Elvis
 
         public override string ToString()
         {
-            return $"Order id: {Id}";
+            return $"Order id: {Id}\tTime Received: {TimeReceived}";
         }
     }
 }

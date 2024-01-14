@@ -15,7 +15,6 @@ using (StreamReader sr = new StreamReader("customers.csv"))
     {
         string[] line = s.Split(',');
         string name = line[0];
-        Console.WriteLine(line[1]);
         int id = Convert.ToInt32(line[1]);
         string dob = line[2];
         Customer customer = new Customer(name, id, dob);
@@ -26,9 +25,17 @@ using (StreamReader sr = new StreamReader("customers.csv"))
 void Menu()
 {
     Console.WriteLine(
-        "====================" +
-        "\nMenu" +
-        "\n====================");
+        "==============================" +
+        "\n            Menu" +
+        "\n==============================" +
+        "\n[1] List all customers" +
+        "\n[2] List all orders" +
+        "\n[3] Register new customer" +
+        "\n[4] Create order" +
+        "\n[5] Display order detaiils" +
+        "\n[6] Modify order" +
+        "\n[0] Exit program" +
+        "\n------------------------------");
 }
 void CustomerInfo()
 {
@@ -38,34 +45,42 @@ void CustomerInfo()
     }
 }
 
-CustomerInfo();
-//Console.Write("Enter option: ");
-//string option = Console.ReadLine();
-//Console.Write("Enter scoops: ");
-//int scoops = Convert.ToInt32(Console.ReadLine());
-
-//IceCream icecream = new Cup(option, scoops);
-//Console.WriteLine(icecream.ToString());
-
-void CurrentOrders()
+void DisplayCurrentOrders()
 {
-    Customer customer1 = new Customer("Amelia", 666888, "01/01/1998");
-    customer1.Rewards = new PointCard { Tier = "Gold", Points = 150 };
-    customer1.CurrentOrder = new Order(1, DateTime.Now);
-
-    Customer customer2 = new Customer("Bob", 888666, "01/02/2000");
-    customer2.Rewards = new PointCard { Tier = "Ordinary", Points = 5 };
-    customer2.CurrentOrder = new Order(2, DateTime.Now);
-
-    Customer customer3 = new Customer("Cody", 898989, "02/02/2001");
-    customer3.Rewards = new PointCard { Tier = "Silver", Points = 65 };
-
-    DisplayCurrentOrders(customer1);
-    DisplayCurrentOrders(customer2);
-    DisplayCurrentOrders(customer3);
+    if (orderQueue.Count == 0 || goldOrderQueue.Count == 0)
+    {
+        Console.WriteLine("No orders.");
+        return;
+    }
+    Console.WriteLine("Gold Order Queue" +
+        "\n------------------");
+    foreach (Order order in goldOrderQueue)
+    {
+        Console.WriteLine(order.ToString());
+    }
+    Console.WriteLine("\nNormal Order Queue" +
+        "\n------------------");
+    foreach(Order order in orderQueue)
+    {
+        Console.WriteLine(order.ToString());
+    }
 }
+/*Customer customer1 = new Customer("Amelia", 666888, "01/01/1998");
+customer1.Rewards = new PointCard { Tier = "Gold", Points = 150 };
+customer1.CurrentOrder = new Order(1, DateTime.Now);
 
-void DisplayCurrentOrders(Customer customer)
+Customer customer2 = new Customer("Bob", 888666, "01/02/2000");
+customer2.Rewards = new PointCard { Tier = "Ordinary", Points = 5 };
+customer2.CurrentOrder = new Order(2, DateTime.Now);
+
+Customer customer3 = new Customer("Cody", 898989, "02/02/2001");
+customer3.Rewards = new PointCard { Tier = "Silver", Points = 65 };
+
+DisplayCurrentOrders(customer1);
+DisplayCurrentOrders(customer2);
+DisplayCurrentOrders(customer3);*/
+
+void DisplayCustomerOrders(Customer customer)
 {
     Console.WriteLine($"Customer: {customer.Name}\t Tier: {customer.Rewards.Tier}");
 
@@ -78,7 +93,6 @@ void DisplayCurrentOrders(Customer customer)
         Console.WriteLine("No current order");
     }
 }
-CurrentOrders();
 void RegisterCustomer()
 {
     Console.Write("Enter customer name: ");
@@ -105,8 +119,40 @@ void AppendToCsvFile(Customer customer)
     File.AppendAllLines(filePath, new[] { csvLine });
 }
 
-RegisterCustomer();
+while (true)
+{
+    Menu();
+    try
+    {
+        Console.Write("Enter option: ");
+        int option = Convert.ToInt16(Console.ReadLine());
 
-Menu();
-
-CustomerInfo();
+        if (option < 0 || option > 6)
+        {
+            throw new Exception();
+        }
+        if (option == 0)
+        {
+            Console.WriteLine("Program ended.");
+            break;
+        }
+        Console.WriteLine();
+        switch (option)
+        {
+            case 1:
+                CustomerInfo();
+                break;
+            case 2:
+                DisplayCurrentOrders();
+                break;
+            case 3:
+                RegisterCustomer();
+                break;
+        }
+        Console.WriteLine();
+    }
+    catch
+    {
+        Console.WriteLine("Invalid option entered. Please re-enter.\n");
+    }
+}
