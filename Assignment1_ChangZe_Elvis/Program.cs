@@ -15,7 +15,6 @@ using (StreamReader sr = new StreamReader("customers.csv"))
     {
         string[] line = s.Split(',');
         string name = line[0];
-        Console.WriteLine(line[1]);
         int id = Convert.ToInt32(line[1]);
         string dob = line[2];
         Customer customer = new Customer(name, id, dob);
@@ -26,9 +25,16 @@ using (StreamReader sr = new StreamReader("customers.csv"))
 void Menu()
 {
     Console.WriteLine(
-        "====================" +
-        "\nMenu" +
-        "\n====================");
+        "==============================" +
+        "\n            Menu" +
+        "\n==============================" +
+        "\n[1] List all customers" +
+        "\n[2] List all orders" +
+        "\n[3] Register new customer" +
+        "\n[4] Create order" +
+        "\n[5] Display order detaiils" +
+        "\n[6] Modify order" +
+        "\n------------------------------");
 }
 void CustomerInfo()
 {
@@ -38,7 +44,6 @@ void CustomerInfo()
     }
 }
 
-CustomerInfo();
 //Console.Write("Enter option: ");
 //string option = Console.ReadLine();
 //Console.Write("Enter scoops: ");
@@ -78,7 +83,6 @@ void DisplayCurrentOrders(Customer customer)
         Console.WriteLine("No current order");
     }
 }
-CurrentOrders();
 void RegisterCustomer()
 {
     Console.Write("Enter customer name: ");
@@ -105,8 +109,28 @@ void AppendToCsvFile(Customer customer)
     File.AppendAllLines(filePath, new[] { csvLine });
 }
 
-RegisterCustomer();
+while (true)
+{
+    Menu();
+    try
+    {
+        Console.Write("Enter option: ");
+        int option = Convert.ToInt16(Console.ReadLine());
+        if (option < 0 || option > 6)
+        {
+            throw new Exception();
+        }
+        if (option == 0)
+        {
+            Console.WriteLine("Program ended.");
+            break;
+        }
+        Console.WriteLine();
+    }
+    catch
+    {
+        Console.WriteLine("Invalid option entered. Please re-enter.\n");
+    }
 
-Menu();
-
-CustomerInfo();
+    
+}
