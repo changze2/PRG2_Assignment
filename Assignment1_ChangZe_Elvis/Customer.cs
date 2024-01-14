@@ -21,7 +21,10 @@ namespace Assignment1_ChangZe_Elvis
         {
             Name = name;
             MemberId = memberId;
-            Dob = DateOnly.FromDateTime(DateTime.ParseExact(dob, "d/M/yyyy", CultureInfo.InvariantCulture));
+            CultureInfo newCulture = new CultureInfo("en-GB");
+            Thread.CurrentThread.CurrentCulture = newCulture;
+            Thread.CurrentThread.CurrentUICulture = newCulture;
+            Dob = DateOnly.FromDateTime(DateTime.Parse(dob));
         }
 
         public Order MakeOrder()
