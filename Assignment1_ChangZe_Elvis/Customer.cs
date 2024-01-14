@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,7 +21,7 @@ namespace Assignment1_ChangZe_Elvis
         {
             Name = name;
             MemberId = memberId;
-            Dob = DateOnly.FromDateTime(DateTime.Parse(dob));
+            Dob = DateOnly.FromDateTime(DateTime.ParseExact(dob, "d/M/yyyy", CultureInfo.InvariantCulture));
         }
 
         public Order MakeOrder()

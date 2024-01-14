@@ -99,7 +99,7 @@ void RegisterCustomer()
     string name = Console.ReadLine();
     Console.Write("Enter customer id number (e.g 650992): ");
     int id  = Convert.ToInt32(Console.ReadLine());
-    Console.Write("Enter date of birth (DD-MM-YYYY): ");
+    Console.Write("Enter date of birth (DD/MM/YYYY): ");
     string dobString = Console.ReadLine();
     Customer newCustomer = new Customer(name, id, dobString);
     PointCard newPointCard = new PointCard();
@@ -122,8 +122,8 @@ void AppendToCsvFile(Customer customer)
 while (true)
 {
     Menu();
-    try
-    {
+/*    try
+    {*/
         Console.Write("Enter option: ");
         int option = Convert.ToInt16(Console.ReadLine());
 
@@ -150,9 +150,9 @@ while (true)
                 break;
         }
         Console.WriteLine();
-    }
-    catch
+    //}
+/*    catch
     {
         Console.WriteLine("Invalid option entered. Please re-enter.\n");
-    }
+    }*/
 }
