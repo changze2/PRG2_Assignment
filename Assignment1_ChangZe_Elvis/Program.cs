@@ -129,7 +129,8 @@ void AppendToCsvFile(Customer customer)
 {
     string relativePath = @"..\..\..\customers.csv";
     string filePath = Path.GetFullPath(relativePath, Directory.GetCurrentDirectory());
-    string csvLine = $"{customer.Name},{customer.MemberId},{customer.Dob}";
+    string csvLine = $"{customer.Name},{customer.MemberId},{customer.Dob},{customer.Rewards.Tier}," +
+        $"{customer.Rewards.Points},{customer.Rewards.Points},{customer.Rewards.PunchCard}";
     File.AppendAllLines(filePath, new[] { csvLine });
 }
 
