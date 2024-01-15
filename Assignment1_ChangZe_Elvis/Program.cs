@@ -19,6 +19,8 @@ using (StreamReader sr = new StreamReader("customers.csv"))
         int id = Convert.ToInt32(line[1]);
         string dob = line[2];
         Customer customer = new Customer(name, id, dob);
+        customer.Rewards = new PointCard { Tier = line[3], Points = Convert.ToInt32(line[4]) };
+        customer.Rewards.PunchCard = Convert.ToInt16(line[5]);
         customerDict.Add(id, customer);
     }
 }
@@ -42,7 +44,7 @@ void CustomerInfo()
 {
     foreach (Customer customer in customerDict.Values)
     {
-        Console.WriteLine(customer.ToString());
+        Console.WriteLine(customer.ToString()+"\t"+customer.Rewards.ToString());
     }
 }
 
@@ -108,7 +110,8 @@ void RegisterCustomer()
         string dobString = Console.ReadLine();
 
         Customer newCustomer = new Customer(name, id, dobString);
-        PointCard newPointCard = new PointCard();
+        PointCard newPointCard = new PointCard(0, 0);
+        newPointCard.Tier = "Ordinary";
         newCustomer.Rewards = newPointCard;
         Console.WriteLine("Registration Successful!");
         customerDict.Add(id, newCustomer);

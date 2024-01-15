@@ -35,7 +35,7 @@ namespace Assignment1_ChangZe_Elvis
 
         public override string ToString()
         {
-            return $"Tier: {Tier}, Points: {Points}";
+            return $"Tier: {Tier}\tPoints: {Points}\tPunch Card: {PunchCard}";
         }
     }
 }
