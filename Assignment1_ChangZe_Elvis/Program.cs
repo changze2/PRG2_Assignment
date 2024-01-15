@@ -101,7 +101,7 @@ void RegisterCustomer()
     try
     {
         Console.Write("Enter customer name: ");
-        string name = Console.ReadLine();
+        string name = Console.ReadLine().Trim();
 
         Console.Write("Enter customer id number (e.g 650992): ");
         int id = Convert.ToInt32(Console.ReadLine());
