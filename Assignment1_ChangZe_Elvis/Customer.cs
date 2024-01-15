@@ -23,7 +23,9 @@ namespace Assignment1_ChangZe_Elvis
             MemberId = memberId;
             CultureInfo newCulture = new CultureInfo("en-GB");
             Thread.CurrentThread.CurrentCulture = newCulture;
-            Thread.CurrentThread.CurrentUICulture = newCulture;
+            //This is to ensure that the timezone is the same regardless of which devices are running the program as some devices
+            //may be running on American time which is in the MM/dd/yyyy format, while UK uses dd/MM/yyyy which is what is used
+            //in this program
             Dob = DateOnly.FromDateTime(DateTime.Parse(dob));
         }
 

@@ -2,6 +2,7 @@
 
 
 using Assignment1_ChangZe_Elvis;
+using System.Globalization;
 
 Dictionary<int, Customer> customerDict = new Dictionary<int, Customer>();
 Queue <Order> goldOrderQueue = new Queue<Order>();
@@ -95,18 +96,28 @@ void DisplayCustomerOrders(Customer customer)
 }
 void RegisterCustomer()
 {
-    Console.Write("Enter customer name: ");
-    string name = Console.ReadLine();
-    Console.Write("Enter customer id number (e.g 650992): ");
-    int id  = Convert.ToInt32(Console.ReadLine());
-    Console.Write("Enter date of birth (DD/MM/YYYY): ");
-    string dobString = Console.ReadLine();
-    Customer newCustomer = new Customer(name, id, dobString);
-    PointCard newPointCard = new PointCard();
-    newCustomer.Rewards = newPointCard;
-    Console.WriteLine("Registration Successful!");
-    customerDict.Add(id, newCustomer);
-    AppendToCsvFile(newCustomer);
+    try
+    {
+        Console.Write("Enter customer name: ");
+        string name = Console.ReadLine();
+
+        Console.Write("Enter customer id number (e.g 650992): ");
+        int id = Convert.ToInt32(Console.ReadLine());
+
+        Console.Write("Enter date of birth (DD-MM-YYYY): ");
+        string dobString = Console.ReadLine();
+
+        Customer newCustomer = new Customer(name, id, dobString);
+        PointCard newPointCard = new PointCard();
+        newCustomer.Rewards = newPointCard;
+        Console.WriteLine("Registration Successful!");
+        customerDict.Add(id, newCustomer);
+        AppendToCsvFile(newCustomer);
+    }
+    catch
+    {
+        Console.WriteLine("Invalid input.");
+    }
 
 }
 //ELVIS: I CREATED ANOTHER METHOD FOR APPENDING NEW CUSTOMER INFORMATION
