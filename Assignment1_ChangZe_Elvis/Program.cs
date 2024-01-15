@@ -102,14 +102,31 @@ void RegisterCustomer()
     {
         Console.Write("Enter customer name: ");
         string name = Console.ReadLine().Trim();
-
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Name cannot be empty or whitespace.");
+        }
+        //This line of code will trigger if the name is null or whitespace
         Console.Write("Enter customer id number (e.g 650992): ");
-        int id = Convert.ToInt32(Console.ReadLine());
-
-        Console.Write("Enter date of birth (DD-MM-YYYY): ");
+        if (!int.TryParse(Console.ReadLine(), out int id) || id <= 0)
+        {
+            throw new ArgumentException("Invalid customer ID. Please follow the examples (e.g 650992).");
+        }
+        //This line of code reads a customer ID from the console, attempts to parse it into an integer using `int.TryParse`,
+        //and checks if the parsing fails or if the parsed integer is not a positive value. If either condition is true,
+        //it throws an `ArgumentException` with a message indicating that the customer ID is invalid and
+        //provides an example for the correct format (e.g., "650992").
+        Console.Write("Enter date of birth (DD/MM/YYYY): ");
         string dobString = Console.ReadLine();
+        if (!DateTime.TryParseExact(dobString, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dob))
+        {
+            throw new ArgumentException("Invalid date of birth format. Please use DD/MM/YYYY.");
+        }
+        //This condition checks if the DateTime.TryParseExact method fails to parse the dobString using the specified format "dd/MM/yyyy."
+        //If the parsing fails, the method returns false, and the ! operator negates it, making the condition true.
+        //In this case, if the date of birth format is invalid, the block inside the if statement is executed, and an ArgumentException is thrown.
 
-        Customer newCustomer = new Customer(name, id, dobString);
+        Customer newCustomer = new Customer(name, id, dob.ToString("dd/MM/yyyy"));
         PointCard newPointCard = new PointCard(0, 0);
         newPointCard.Tier = "Ordinary";
         newCustomer.Rewards = newPointCard;
@@ -117,12 +134,16 @@ void RegisterCustomer()
         customerDict.Add(id, newCustomer);
         AppendToCsvFile(newCustomer);
     }
-    catch
+    catch (ArgumentException ex)
     {
-        Console.WriteLine("Invalid input.");
+        Console.WriteLine($"Invalid input: {ex.Message}");
     }
-
+    catch (Exception)
+    {
+        Console.WriteLine("An unexpected error occurred during registration.");
+    }
 }
+
 //ELVIS: I CREATED ANOTHER METHOD FOR APPENDING NEW CUSTOMER INFORMATION
 //       INTO THE CSV FILE
 void AppendToCsvFile(Customer customer)
