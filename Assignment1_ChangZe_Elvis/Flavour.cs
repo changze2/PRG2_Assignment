@@ -10,19 +10,19 @@ namespace Assignment1_ChangZe_Elvis
     {
         public string Type { get; set; }
         public bool Premium { get; set; }
-        public int Quality { get; set; }
+        public int Quantity { get; set; }
 
         public Flavour() { }
-        public Flavour(string type, bool premium, int quality)
+        public Flavour(string type, bool premium, int quantity)
         {
             Type = type;
             Premium = premium;
-            Quality = quality;
+            Quantity = quantity;
         }
 
         public override string ToString()
         {
-            return $"Type: {Type}\tPremium: {Premium}\tQuality: {Quality}";
+            return $"Type: {Type}\tPremium: {Premium}\tQuantity: {Quantity}";
         }
     }
 }

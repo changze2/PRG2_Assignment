@@ -11,15 +11,15 @@ namespace Assignment1_ChangZe_Elvis
         public string Option { get; set; }
         public int Scoop { get; set; }
         public List<Flavour> Flavours { get; set; } = new List<Flavour>();
-        public List<Topping> Toppings { get; set; } 
+        public List<Topping> Toppings { get; set; } = new List<Topping>();
 
         public IceCream() { }
-        public IceCream(string option, int scoop) //List<Flavour> flavours, List<Topping> toppings)
+        public IceCream(string option, int scoop, List<Flavour> flavours, List<Topping> toppings)
         {
             Option = option;
             Scoop = scoop;
-            //Flavours = flavours;
-            //Toppings = toppings;
+            Flavours = flavours;
+            Toppings = toppings;
         }
 
         public abstract double CalculatePrice();

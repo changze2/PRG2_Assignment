@@ -8,6 +8,14 @@ namespace Assignment1_ChangZe_Elvis
 {
     class Waffle : IceCream
     {
+        public string WaffleFlavour { get; set; }
+
+        public Waffle() { }
+        public Waffle(string option, int scoop, List<Flavour> flavours, List<Topping> toppings, string waffleFlavour)
+            : base(option, scoop, flavours, toppings)
+        {
+            WaffleFlavour = waffleFlavour;
+        }
         public override double CalculatePrice()
         {
             if (Scoop == 1)

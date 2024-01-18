@@ -9,6 +9,15 @@ namespace Assignment1_ChangZe_Elvis
 {
     class Cone : IceCream
     {
+        public bool Dipped { get; set; }
+
+        public Cone() { }
+        public Cone(string option, int scoop, List<Flavour> flavours, List<Topping> toppings, bool dipped)
+            : base(option, scoop, flavours, toppings)
+        {
+            Dipped = dipped;
+        }
+
         public override double CalculatePrice()
         {
             if (Scoop == 1)

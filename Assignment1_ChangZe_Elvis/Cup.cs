@@ -9,7 +9,8 @@ namespace Assignment1_ChangZe_Elvis
     class Cup : IceCream
     {
         public Cup() { }
-        public Cup(string option, int scoop/*, List<Flavour> flavours, List<Topping> toppings*/) : base(option, scoop/*, flavours, toppings*/) { }
+        public Cup(string option, int scoop, List<Flavour> flavours, List<Topping> toppings)
+            : base(option, scoop, flavours, toppings) { }
 
         public override double CalculatePrice()
         {

@@ -10,6 +10,7 @@ Queue <Order> goldOrderQueue = new Queue<Order>();
 Queue <Order> orderQueue = new Queue<Order>();
 
 InitCustomers();
+InitOrders();
 
 while (true)
 {
@@ -29,6 +30,10 @@ while (true)
             break;
         }
         Console.WriteLine();
+
+        //We chose to use switch case statements as it runs faster than using if else statements. if else statements
+        //run each if statementsin order while switch case statements run the case where the condition
+        //is met, such as input = 1 and so on.
         switch (option)
         {
             case 1:
@@ -39,6 +44,15 @@ while (true)
                 break;
             case 3:
                 RegisterCustomer();
+                break;
+            case 4:
+                Console.WriteLine("To be implemented soon.");
+                break;
+            case 5:
+                Console.WriteLine("To be implemented soon.");
+                break;
+            case 6:
+                Console.WriteLine("To be implemented soon.");
                 break;
         }
         Console.WriteLine();
@@ -62,13 +76,54 @@ void InitCustomers()
             int id = Convert.ToInt32(line[1]);
             string dob = line[2];
             Customer customer = new Customer(name, id, dob);
-            customer.Rewards = new PointCard { Tier = line[3], Points = Convert.ToInt32(line[4]) };
-            customer.Rewards.PunchCard = Convert.ToInt16(line[5]);
+            customer.Rewards = new PointCard(Convert.ToInt32(line[4]), Convert.ToInt16(line[5]));
+            customer.Rewards.Tier = line[3];
             customerDict.Add(id, customer);
         }
     }
 }
 
+Flavour FlavourPremiumCheck(string flavour)
+{
+    if (flavour == "Vanilla" || flavour == "Chocolate" || flavour == "Strawberry")
+    {
+        return new Flavour(flavour, false, 1);
+    }
+    else if (flavour == "Durian" || flavour == "Ube" || flavour == "Sea salt")
+    {
+        return new Flavour(flavour, true, 1);
+    }
+    return null;
+}
+void InitOrders()
+{
+    using (StreamReader sr = new StreamReader("orders.csv"))
+    {
+        string? s = sr.ReadLine();
+        if (s != null) { }
+        while ((s = sr.ReadLine()) != null)
+        {
+            string[] line = s.Split(',');
+            int orderId = Convert.ToInt16(line[0]);
+            int memberId = Convert.ToInt32(line[1]);
+            DateTime timeReceived = Convert.ToDateTime(line[2]);
+            DateTime timeFulfilled = Convert.ToDateTime(line[3]);
+            string option = line[4];
+            int scoops = Convert.ToInt16(line[5]);
+            if (line[6] != "") { bool dipped = Convert.ToBoolean(line[6]); }
+            if (line[7] != "") { string waffleFlavour = line[7]; }
+            List<Flavour> flavourList = new List<Flavour>();
+            List<Topping> toppingsList = new List<Topping>();
+            string flavour1 = line[8];
+            string flavour2 = line[9];
+            string flavour3 = line[10];
+            string topping1 = line[11];
+            string topping2 = line[12];
+            string topping3 = line[13];
+            string topping4 = line[14];
+        }
+    }
+}
 
 void Menu()
 {
