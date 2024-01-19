@@ -83,20 +83,10 @@ void InitCustomers()
     }
 }
 
-Flavour FlavourPremiumCheck(string flavour)
-{
-    if (flavour == "Vanilla" || flavour == "Chocolate" || flavour == "Strawberry")
-    {
-        return new Flavour(flavour, false, 1);
-    }
-    else if (flavour == "Durian" || flavour == "Ube" || flavour == "Sea salt")
-    {
-        return new Flavour(flavour, true, 1);
-    }
-    return null;
-}
 void InitOrders()
 {
+    Dictionary<int, Order> orderDict = new Dictionary<int, Order>();
+    Dictionary<int, int> orderByMember = new Dictionary<int, int>();
     using (StreamReader sr = new StreamReader("orders.csv"))
     {
         string? s = sr.ReadLine();
@@ -110,19 +100,68 @@ void InitOrders()
             DateTime timeFulfilled = Convert.ToDateTime(line[3]);
             string option = line[4];
             int scoops = Convert.ToInt16(line[5]);
-            if (line[6] != "") { bool dipped = Convert.ToBoolean(line[6]); }
-            if (line[7] != "") { string waffleFlavour = line[7]; }
+            bool dipped = false;
+            if (line[6] != "") { dipped = Convert.ToBoolean(line[6]); }
+            string waffleFlavour = line[7];
             List<Flavour> flavourList = new List<Flavour>();
             List<Topping> toppingsList = new List<Topping>();
-            string flavour1 = line[8];
-            string flavour2 = line[9];
-            string flavour3 = line[10];
-            string topping1 = line[11];
-            string topping2 = line[12];
-            string topping3 = line[13];
-            string topping4 = line[14];
+            List<string> flavourStrings = new List<string> { line[8], line[9], line[10] };
+            List<string> toppingsStrings = new List<string> { line[11], line[12], line[13], line[14] };
+            foreach (string flavour in flavourStrings)
+            {
+                if (flavour == "") { continue; }
+                flavourList.Add(FlavourPremiumCheck(flavour));
+            }
+            foreach (string topping in toppingsStrings)
+            {
+                if (topping == "") { continue; }
+                toppingsList.Add(new Topping(topping));
+            }
+            IceCream icecream = null;
+            if (option == "Waffle")
+            {
+                icecream = new Waffle(option, scoops, flavourList, toppingsList, waffleFlavour);
+            }
+            else if (option == "Cone")
+            {
+                icecream = new Cone(option, scoops, flavourList, toppingsList, dipped);
+            }
+            else
+            {
+                icecream = new Cup(option, scoops, flavourList, toppingsList);
+            }
+            if (orderDict.ContainsKey(orderId) == false)
+            {
+                Order order = new Order(orderId, timeReceived);
+                order.TimeFulfilled = timeFulfilled;
+                order.IceCreamList.Add(icecream);
+                orderDict[orderId] = order;
+                orderByMember[memberId] = orderId;
+            }
+            else
+            {
+                orderDict[orderId].TimeFulfilled = timeFulfilled;
+                orderDict[orderId].IceCreamList.Add(icecream);
+            }
         }
     }
+    foreach (int memberId in orderByMember.Keys)
+    {
+        customerDict[memberId].OrderHistory.Add(orderDict[orderByMember[memberId]]);
+    }
+}
+
+Flavour FlavourPremiumCheck(string flavour)
+{
+    if (flavour == "Vanilla" || flavour == "Chocolate" || flavour == "Strawberry")
+    {
+        return new Flavour(flavour, false, 1);
+    }
+    else if (flavour == "Durian" || flavour == "Ube" || flavour == "Sea salt")
+    {
+        return new Flavour(flavour, true, 1);
+    }
+    return null;
 }
 
 void Menu()
