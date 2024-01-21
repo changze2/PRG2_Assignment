@@ -4,8 +4,10 @@
 using Assignment1_ChangZe_Elvis;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using static System.Formats.Asn1.AsnWriter;
 
 Dictionary<int, Customer> customerDict = new Dictionary<int, Customer>();
+Dictionary<int, Order> orderDict = new Dictionary<int, Order>();
 Queue <Order> goldOrderQueue = new Queue<Order>();
 Queue <Order> orderQueue = new Queue<Order>();
 
@@ -37,7 +39,8 @@ while (true)
         switch (option)
         {
             case 1:
-                CustomerInfo();
+                DisplayCustomerInfo();
+                Console.WriteLine($"There are {customerDict.Count} customers.");
                 break;
             case 2:
                 DisplayCurrentOrders();
@@ -59,7 +62,7 @@ while (true)
     }
     catch
     {
-        Console.WriteLine("Invalid option entered. Please enter a valid option.\n");
+        Console.WriteLine("\nInvalid option entered. Please enter a valid option.\n");
     }
 }
 
@@ -85,7 +88,6 @@ void InitCustomers()
 
 void InitOrders()
 {
-    Dictionary<int, Order> orderDict = new Dictionary<int, Order>();
     Dictionary<int, int> orderByMember = new Dictionary<int, int>();
     using (StreamReader sr = new StreamReader("orders.csv"))
     {
@@ -137,6 +139,14 @@ void InitOrders()
                 order.IceCreamList.Add(icecream);
                 orderDict[orderId] = order;
                 orderByMember[memberId] = orderId;
+                if (customerDict[memberId].Rewards.Tier == "Gold")
+                {
+                    goldOrderQueue.Enqueue(order);
+                }
+                else
+                {
+                    orderQueue.Enqueue(order);
+                }
             }
             else
             {
@@ -151,15 +161,16 @@ void InitOrders()
     }
 }
 
-Flavour FlavourPremiumCheck(string flavour)
+Flavour FlavourPremiumCheck(string flavourOrg)
 {
-    if (flavour == "Vanilla" || flavour == "Chocolate" || flavour == "Strawberry")
+    string flavour = flavourOrg.ToLower();
+    if (flavour == "vanilla" || flavour == "chocolate" || flavour == "strawberry")
     {
-        return new Flavour(flavour, false, 1);
+        return new Flavour(flavourOrg, false, 1);
     }
-    else if (flavour == "Durian" || flavour == "Ube" || flavour == "Sea salt")
+    else if (flavour == "durian" || flavour == "ube" || flavour == "sea salt")
     {
-        return new Flavour(flavour, true, 1);
+        return new Flavour(flavourOrg, true, 1);
     }
     return null;
 }
@@ -179,14 +190,24 @@ void Menu()
         "\n[0] Exit program" +
         "\n------------------------------");
 }
-void CustomerInfo()
+
+//Option 1 - List all customers
+void DisplayCustomerInfo()
 {
+    Console.WriteLine("================================================================================" +
+        "\n                                   Customers" +
+        "\n================================================================================" +
+        $"\n{"Name",-13} | {"ID",-8} | {"DOB",-11} | {"Tier",-10} | {"Points",-6} | {"Punch Card",-5}" +
+        "\n--------------------------------------------------------------------------------");
     foreach (Customer customer in customerDict.Values)
     {
-        Console.WriteLine(customer.ToString()+"\t"+customer.Rewards.ToString());
+        Console.WriteLine($"{customer.Name,-13} | {customer.MemberId,-8} | {customer.Dob,-11} | {customer.Rewards.Tier,-10} | " +
+            $"{customer.Rewards.Points,-6} | {customer.Rewards.PunchCard,-5}");
+        //Console.WriteLine(customer.ToString()+"\t"+customer.Rewards.ToString());
     }
 }
 
+//Option 2 - List all current orders
 void DisplayCurrentOrders()
 {
     if (orderQueue.Count == 0 || goldOrderQueue.Count == 0)
@@ -199,42 +220,24 @@ void DisplayCurrentOrders()
     foreach (Order order in goldOrderQueue)
     {
         Console.WriteLine(order.ToString());
+        foreach (IceCream icecream in order.IceCreamList)
+        {
+            Console.WriteLine(icecream.ToString());
+        }
     }
     Console.WriteLine("\nNormal Order Queue" +
         "\n------------------");
-    foreach(Order order in orderQueue)
+    foreach (Order order in orderQueue)
     {
         Console.WriteLine(order.ToString());
+        foreach (IceCream icecream in order.IceCreamList)
+        {
+            Console.WriteLine(icecream.ToString());
+        }
     }
 }
-/*Customer customer1 = new Customer("Amelia", 666888, "01/01/1998");
-customer1.Rewards = new PointCard { Tier = "Gold", Points = 150 };
-customer1.CurrentOrder = new Order(1, DateTime.Now);
 
-Customer customer2 = new Customer("Bob", 888666, "01/02/2000");
-customer2.Rewards = new PointCard { Tier = "Ordinary", Points = 5 };
-customer2.CurrentOrder = new Order(2, DateTime.Now);
-
-Customer customer3 = new Customer("Cody", 898989, "02/02/2001");
-customer3.Rewards = new PointCard { Tier = "Silver", Points = 65 };
-
-DisplayCurrentOrders(customer1);
-DisplayCurrentOrders(customer2);
-DisplayCurrentOrders(customer3);*/
-
-void DisplayCustomerOrders(Customer customer)
-{
-    Console.WriteLine($"Customer: {customer.Name}\t Tier: {customer.Rewards.Tier}");
-
-    if (customer.CurrentOrder != null)
-    {
-        Console.WriteLine($"Order ID: {customer.CurrentOrder.Id}\t Order Date: {customer.CurrentOrder.TimeReceived.ToString("dd/MM/yyyy HH:mm:ss")}");
-    }
-    else
-    {
-        Console.WriteLine("No current order");
-    }
-}
+//Option 3 - Register a new customer
 void RegisterCustomer()
 {
     try
@@ -277,7 +280,7 @@ void RegisterCustomer()
         newCustomer.Rewards = newPointCard;
         Console.WriteLine("Registration Successful!");
         customerDict.Add(id, newCustomer);
-        AppendToCsvFile(newCustomer);
+        AppendCustomerToCsvFile(newCustomer);
     }
     catch (ArgumentException ex)
     {
@@ -289,9 +292,89 @@ void RegisterCustomer()
     }
 }
 
-//ELVIS: I CREATED ANOTHER METHOD FOR APPENDING NEW CUSTOMER INFORMATION
-//       INTO THE CSV FILE
-void AppendToCsvFile(Customer customer)
+//Option 4 - Create customer's order
+void CreateCustomerOrder()
+{
+    DisplayCustomerInfo();
+    Console.Write("\nEnter ID of customer: ");
+    int id = Convert.ToInt32(Console.ReadLine());
+    Customer customer = customerDict[id];
+    Order order = new Order();
+    Console.Write("Enter your option of icecream (Cup, Cone, Waffle");
+    string option = Console.ReadLine().ToLower();
+    Console.Write("Enter number of scoops (1-3)");
+    int scoops = Convert.ToInt16(Console.ReadLine());
+    for (int i = 0; i != scoops; i++)
+    {
+        Console.WriteLine($"Scoop {i}");
+        List<Flavour> flavourList = new List<Flavour>();
+        List<Topping> toppingsList = new List<Topping>();
+        Console.Write("Enter flavour of icecream: ");
+        string flavour = Console.ReadLine();
+        Console.Write("Enter toppings for this scoop (enter \"None\" for no toppings): ");
+        string toppings = Console.ReadLine().ToLower();
+        flavourList.Add(FlavourPremiumCheck(flavour));
+        if (toppings != "none")
+        {
+            toppingsList.Add(new Topping(toppings));
+        }
+        IceCream icecream = null;
+        if (option == "waffle")
+        {
+            Console.Write("Enter waffle flavour: ");
+            string waffleFlavour = Console.ReadLine();
+            icecream = new Waffle(option, scoops, flavourList, toppingsList, waffleFlavour);
+        }
+        else if (option == "cone")
+        {
+            bool dipped = false;
+            icecream = new Cone(option, scoops, flavourList, toppingsList, dipped);
+        }
+        else if (option == "cup")
+        {
+            icecream = new Cup(option, scoops, flavourList, toppingsList);
+        }
+        /*if (orderDict.ContainsKey(orderId) == false)
+        {
+            Order order = new Order(orderId, timeReceived);
+            order.TimeFulfilled = timeFulfilled;
+            order.IceCreamList.Add(icecream);
+            orderDict[orderId] = order;
+            orderByMember[memberId] = orderId;
+            if (customerDict[memberId].Rewards.Tier == "Gold")
+            {
+                goldOrderQueue.Enqueue(order);
+            }
+            else
+            {
+                orderQueue.Enqueue(order);
+            }
+        }
+        else
+        {
+            orderDict[orderId].TimeFulfilled = timeFulfilled;
+            orderDict[orderId].IceCreamList.Add(icecream);
+        }*/
+    }
+}
+
+//Option 5 - Display order details of a customer.
+void DisplayCustomerOrders(Customer customer)
+{
+    Console.WriteLine($"Customer: {customer.Name}\t Tier: {customer.Rewards.Tier}");
+
+    if (customer.CurrentOrder != null)
+    {
+        Console.WriteLine($"Order ID: {customer.CurrentOrder.Id}\t Order Date: {customer.CurrentOrder.TimeReceived.ToString("dd/MM/yyyy HH:mm:ss")}");
+    }
+    else
+    {
+        Console.WriteLine("No current order");
+    }
+}
+
+//New method for appending customer information into csv file
+void AppendCustomerToCsvFile(Customer customer)
 {
     string relativePath = @"..\..\..\customers.csv";
     string filePath = Path.GetFullPath(relativePath, Directory.GetCurrentDirectory());
@@ -299,5 +382,4 @@ void AppendToCsvFile(Customer customer)
         $"{customer.Rewards.Points},{customer.Rewards.PunchCard}";
     File.AppendAllLines(filePath, new[] { csvLine });
 }
-
 
