@@ -93,7 +93,6 @@ void InitCustomers()
 
 void InitOrders()
 {
-    Dictionary<int, int> orderByMember = new Dictionary<int, int>();
     using (StreamReader sr = new StreamReader("orders.csv"))
     {
         string? s = sr.ReadLine();
@@ -143,7 +142,6 @@ void InitOrders()
                 order.TimeFulfilled = timeFulfilled;
                 order.IceCreamList.Add(icecream);
                 orderDict[orderId] = order;
-                orderByMember[memberId] = orderId;
                 customerDict[memberId].OrderHistory.Add(order);
                 if (customerDict[memberId].Rewards.Tier == "Gold")
                 {
