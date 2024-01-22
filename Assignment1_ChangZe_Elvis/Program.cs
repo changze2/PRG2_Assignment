@@ -24,7 +24,7 @@ while (true)
 
         if (option < 0 || option > 6)
         {
-            throw new Exception();
+            throw new ArgumentException();
         }
         if (option == 0)
         {
@@ -60,10 +60,15 @@ while (true)
         }
         Console.WriteLine();
     }
+    catch (ArgumentException)
+    {
+        Console.WriteLine("\nPlease enter an option between 1-6.\n");
+    }
     catch
     {
         Console.WriteLine("\nInvalid option entered. Please enter a valid option.\n");
     }
+
 }
 
 void InitCustomers()
