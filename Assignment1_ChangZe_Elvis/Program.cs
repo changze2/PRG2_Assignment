@@ -143,7 +143,7 @@ void InitOrders()
                 order.TimeFulfilled = timeFulfilled;
                 order.IceCreamList.Add(icecream);
                 orderDict[orderId] = order;
-                orderByMember[memberId] = orderId;
+                customerDict[memberId].OrderHistory.Add(order);
                 if (customerDict[memberId].Rewards.Tier == "Gold")
                 {
                     goldOrderQueue.Enqueue(order);
@@ -159,10 +159,6 @@ void InitOrders()
                 orderDict[orderId].IceCreamList.Add(icecream);
             }
         }
-    }
-    foreach (int memberId in orderByMember.Keys)
-    {
-        customerDict[memberId].OrderHistory.Add(orderDict[orderByMember[memberId]]);
     }
 }
 
