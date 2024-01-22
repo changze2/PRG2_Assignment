@@ -55,7 +55,7 @@ while (true)
                 DisplayCustomerOrders();
                 break;
             case 6:
-                Console.WriteLine("To be implemented soon.");
+                ModifyOrderDetails();
                 break;
         }
         Console.WriteLine();
@@ -181,7 +181,7 @@ void Menu()
 {
     Console.WriteLine(
         "==============================" +
-        "\n            Menu" +
+        "\n            Menu" +"\n            Menu" +
         "\n==============================" +
         "\n[1] List all customers" +
         "\n[2] List all orders" +
@@ -379,6 +379,45 @@ void DisplayCustomerOrders()
     }
 }
 
+//Option 6 - Modify order details
+void ModifyOrderDetails()
+{
+    DisplayCustomerInfo();
+    Console.WriteLine();
+    Console.Write("Please input customer id (e.g 123456) to select the customer: ");
+    int selected_id = Convert.ToInt32(Console.ReadLine());
+    Console.WriteLine();
+    /*Console.WriteLine(customerDict[selected_id].CurrentOrder.ToString());
+    foreach (IceCream iceCream in customerDict[selected_id].CurrentOrder)
+    {
+        Console.WriteLine(iceCream.ToString());
+    }
+    */
+    Console.WriteLine();
+    Console.WriteLine(
+        "\n==============================" +
+        "\n            Option" +
+        "\n==============================" +
+        "\n[1] Choose an existing ice cream object to modify" +
+        "\n[2] Add an entirely new ice cream object to the order" +
+        "\n[3] Choose an existing ice cream object to delete from the order" +
+        "\n==============================");
+    Console.Write("Please input your option: ");
+    int option = Convert.ToInt32(Console.ReadLine());
+    if (option == 1)
+    {
+        Console.WriteLine("Please select which ice cream to modify: ");
+        Console.WriteLine("")
+    }
+    else if (option == 2)
+    {
+
+    }
+    else if (option == 3)
+    {
+
+    }
+}
 //New method for appending customer information into csv file
 void AppendCustomerToCsvFile(Customer customer)
 {
