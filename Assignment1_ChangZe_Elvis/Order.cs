@@ -46,7 +46,14 @@ namespace Assignment1_ChangZe_Elvis
 
         public override string ToString()
         {
-            return $"Order id: {Id}\tTime Received: {TimeReceived}";
+            if (TimeFulfilled == null)
+            {
+                return $"Order id: {Id}\tTime Received: {TimeReceived}";
+            }
+            else
+            {
+                return $"Order id: {Id}\tTime Received: {TimeReceived}\tTime Fulfilled: {TimeFulfilled}";
+            }
         }
     }
 }

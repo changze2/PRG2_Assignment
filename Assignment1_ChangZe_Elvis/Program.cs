@@ -52,7 +52,7 @@ while (true)
                 Console.WriteLine("To be implemented soon.");
                 break;
             case 5:
-                Console.WriteLine("To be implemented soon.");
+                DisplayCustomerOrders();
                 break;
             case 6:
                 Console.WriteLine("To be implemented soon.");
@@ -144,6 +144,7 @@ void InitOrders()
                 order.IceCreamList.Add(icecream);
                 orderDict[orderId] = order;
                 orderByMember[memberId] = orderId;
+                customerDict[memberId].OrderHistory.Add(order);
                 if (customerDict[memberId].Rewards.Tier == "Gold")
                 {
                     goldOrderQueue.Enqueue(order);
@@ -159,10 +160,6 @@ void InitOrders()
                 orderDict[orderId].IceCreamList.Add(icecream);
             }
         }
-    }
-    foreach (int memberId in orderByMember.Keys)
-    {
-        customerDict[memberId].OrderHistory.Add(orderDict[orderByMember[memberId]]);
     }
 }
 
@@ -190,7 +187,7 @@ void Menu()
         "\n[2] List all orders" +
         "\n[3] Register new customer" +
         "\n[4] Create order" +
-        "\n[5] Display order detaiils" +
+        "\n[5] Display order details" +
         "\n[6] Modify order" +
         "\n[0] Exit program" +
         "\n------------------------------");
@@ -364,17 +361,21 @@ void CreateCustomerOrder()
 }
 
 //Option 5 - Display order details of a customer.
-void DisplayCustomerOrders(Customer customer)
+void DisplayCustomerOrders()
 {
-    Console.WriteLine($"Customer: {customer.Name}\t Tier: {customer.Rewards.Tier}");
-
-    if (customer.CurrentOrder != null)
+    DisplayCustomerInfo();
+    Console.WriteLine();
+    Console.Write("Please input customer id (e.g 123456) to select the customer: ");
+    int selected_id = Convert.ToInt32(Console.ReadLine());
+    Console.WriteLine();
+    foreach (Order orders in customerDict[selected_id].OrderHistory)
     {
-        Console.WriteLine($"Order ID: {customer.CurrentOrder.Id}\t Order Date: {customer.CurrentOrder.TimeReceived.ToString("dd/MM/yyyy HH:mm:ss")}");
-    }
-    else
-    {
-        Console.WriteLine("No current order");
+        Console.WriteLine(orders.ToString());
+        foreach (IceCream iceCream in orders.IceCreamList)
+        {
+            Console.WriteLine(iceCream.ToString());
+        }
+        Console.WriteLine();
     }
 }
 
