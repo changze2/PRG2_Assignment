@@ -18,22 +18,39 @@ namespace Assignment1_ChangZe_Elvis
         }
         public override double CalculatePrice()
         {
+            int premiumFlavours = 0;
+            foreach (Flavour flavour in Flavours)
+            {
+                if (flavour.Premium)
+                {
+                    premiumFlavours++;
+                }
+            }
+            double scoopTotal = 0;
             if (Scoop == 1)
             {
-                return 7.0;
+                scoopTotal = 4.0;
             }
             else if (Scoop == 2)
             {
-                return 8.5;
+                scoopTotal = 5.5;
             }
             else if (Scoop == 3)
             {
-                return 9.5;
+                scoopTotal = 6.5;
             }
-            else
+            if (WaffleFlavour != "Original")
             {
-                return 0;
+                return scoopTotal + (premiumFlavours * 2) + Toppings.Count() + 3;
             }
+            return scoopTotal + (premiumFlavours * 2) + Toppings.Count();
+        }
+        public override string ToString()
+        {
+            string flavoursString = string.Join(", ", Flavours.Select(flavour => flavour.Type));
+            string toppingsString = string.Join(", ", Toppings.Select(topping => topping.Type));
+            return $"Option: {Option}\tScoops: {Scoop}\tFlavours: {flavoursString}\tToppings: {toppingsString}" +
+                $"Waffle Flavour: {WaffleFlavour}";
         }
     }
 }

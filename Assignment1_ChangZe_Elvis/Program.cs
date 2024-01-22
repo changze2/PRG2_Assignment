@@ -10,7 +10,8 @@ Dictionary<int, Customer> customerDict = new Dictionary<int, Customer>();
 Dictionary<int, Order> orderDict = new Dictionary<int, Order>();
 Queue <Order> goldOrderQueue = new Queue<Order>();
 Queue <Order> orderQueue = new Queue<Order>();
-
+List<string> toppingOptions = new List<string> { "sprinkles", "mochi", "sago", "oreos" };
+List<string> flavourOptions = new List<string> { "vanilla", "chocolate", "strawberry", "durian", "ube", "sea salt" };
 InitCustomers();
 InitOrders();
 
@@ -49,13 +50,14 @@ while (true)
                 RegisterCustomer();
                 break;
             case 4:
-                Console.WriteLine("To be implemented soon.");
+                CreateCustomerOrder();
                 break;
             case 5:
                 DisplayCustomerOrders();
                 break;
             case 6:
-                ModifyOrderDetails();
+                Console.WriteLine("To be implemented.");
+                //ModifyOrderDetails();
                 break;
         }
         Console.WriteLine();
@@ -161,25 +163,11 @@ void InitOrders()
     }
 }
 
-Flavour FlavourPremiumCheck(string flavourOrg)
-{
-    string flavour = flavourOrg.ToLower();
-    if (flavour == "vanilla" || flavour == "chocolate" || flavour == "strawberry")
-    {
-        return new Flavour(flavourOrg, false, 1);
-    }
-    else if (flavour == "durian" || flavour == "ube" || flavour == "sea salt")
-    {
-        return new Flavour(flavourOrg, true, 1);
-    }
-    return null;
-}
-
 void Menu()
 {
     Console.WriteLine(
         "==============================" +
-        "\n            Menu" +"\n            Menu" +
+        "\n            Menu" +
         "\n==============================" +
         "\n[1] List all customers" +
         "\n[2] List all orders" +
@@ -203,8 +191,8 @@ void DisplayCustomerInfo()
     {
         Console.WriteLine($"{customer.Name,-13} | {customer.MemberId,-8} | {customer.Dob,-11} | {customer.Rewards.Tier,-10} | " +
             $"{customer.Rewards.Points,-6} | {customer.Rewards.PunchCard,-5}");
-        //Console.WriteLine(customer.ToString()+"\t"+customer.Rewards.ToString());
     }
+    Console.WriteLine("--------------------------------------------------------------------------------");
 }
 
 //Option 2 - List all current orders
@@ -300,25 +288,21 @@ void CreateCustomerOrder()
     int id = Convert.ToInt32(Console.ReadLine());
     Customer customer = customerDict[id];
     Order order = new Order();
-    Console.Write("Enter your option of icecream (Cup, Cone, Waffle");
+    Console.Write("Enter your option of icecream (Cup, Cone, Waffle): ");
     string option = Console.ReadLine().ToLower();
-    Console.Write("Enter number of scoops (1-3)");
+    Console.Write("Enter number of scoops (1-3): ");
     int scoops = Convert.ToInt16(Console.ReadLine());
+    IceCream icecream = null;
+    List<Flavour> flavourList = new List<Flavour>();
+    List<Topping> toppingsList = new List<Topping>();
+    Console.WriteLine();
+    DisplayFlavours();
     for (int i = 0; i != scoops; i++)
     {
-        Console.WriteLine($"Scoop {i}");
-        List<Flavour> flavourList = new List<Flavour>();
-        List<Topping> toppingsList = new List<Topping>();
+        Console.WriteLine($"\nScoop {i+1}");
         Console.Write("Enter flavour of icecream: ");
         string flavour = Console.ReadLine();
-        Console.Write("Enter toppings for this scoop (enter \"None\" for no toppings): ");
-        string toppings = Console.ReadLine().ToLower();
         flavourList.Add(FlavourPremiumCheck(flavour));
-        if (toppings != "none")
-        {
-            toppingsList.Add(new Topping(toppings));
-        }
-        IceCream icecream = null;
         if (option == "waffle")
         {
             Console.Write("Enter waffle flavour: ");
@@ -334,27 +318,22 @@ void CreateCustomerOrder()
         {
             icecream = new Cup(option, scoops, flavourList, toppingsList);
         }
-        /*if (orderDict.ContainsKey(orderId) == false)
+        Console.WriteLine();
+    }
+    DisplayToppings();
+    for (int i = 0;i < 4;i++)
+    {
+        Console.WriteLine("You can enter a maximum of 4 toppings.");
+        Console.Write("Enter topping(enter \"None\" for no toppings): ");
+        string toppings = Console.ReadLine().ToLower();
+        if (toppings == "none")
         {
-            Order order = new Order(orderId, timeReceived);
-            order.TimeFulfilled = timeFulfilled;
-            order.IceCreamList.Add(icecream);
-            orderDict[orderId] = order;
-            orderByMember[memberId] = orderId;
-            if (customerDict[memberId].Rewards.Tier == "Gold")
-            {
-                goldOrderQueue.Enqueue(order);
-            }
-            else
-            {
-                orderQueue.Enqueue(order);
-            }
+            break;
         }
         else
         {
-            orderDict[orderId].TimeFulfilled = timeFulfilled;
-            orderDict[orderId].IceCreamList.Add(icecream);
-        }*/
+            icecream.Toppings.Add(new Topping(toppings));
+        }
     }
 }
 
@@ -405,7 +384,7 @@ void ModifyOrderDetails()
     if (option == 1)
     {
         Console.WriteLine("Please select which ice cream to modify: ");
-        Console.WriteLine("")
+        Console.WriteLine("");
     }
     else if (option == 2)
     {
@@ -426,3 +405,46 @@ void AppendCustomerToCsvFile(Customer customer)
     File.AppendAllLines(filePath, new[] { csvLine });
 }
 
+Flavour FlavourPremiumCheck(string flavourOrg)
+{
+    string flavour = flavourOrg.ToLower();
+    if (flavour == "vanilla" || flavour == "chocolate" || flavour == "strawberry")
+    {
+        return new Flavour(flavourOrg, false, 1);
+    }
+    else if (flavour == "durian" || flavour == "ube" || flavour == "sea salt")
+    {
+        return new Flavour(flavourOrg, true, 1);
+    }
+    return null;
+}
+
+void DisplayFlavours()
+{
+    Console.WriteLine(
+        "====================" +
+        "\n      Flavours" +
+        "\n====================");
+    foreach (string flavour in flavourOptions)
+    {
+        string flavourC = char.ToUpper(flavour[0]) + flavour.Substring(1);
+        if (toppingOptions.IndexOf(flavourC) > 2)
+        {
+            Console.WriteLine($"{flavourC,-10} |");
+        }
+        Console.WriteLine($"{flavourC,-10} | +$2.00");
+    }
+}
+
+void DisplayToppings()
+{
+    Console.WriteLine(
+        "====================" +
+        "\n      Toppings" +
+        "\n====================");
+    foreach (string topping in toppingOptions)
+    {
+        string toppingC = char.ToUpper(topping[0]) + topping.Substring(1);
+        Console.WriteLine($"{toppingC,-10} | +$1.00");
+    }
+}
