@@ -27,8 +27,8 @@ Console.WriteLine(
 while (true)
 {
     Menu();
-/*    try
-    {*/
+    try
+    {
         Console.Write("Enter option: ");
         int option = Convert.ToInt16(Console.ReadLine().Trim());
 
@@ -62,7 +62,8 @@ while (true)
                 CreateCustomerOrder();
                 break;
             case 5:
-                DisplayCustomerOrders();
+                Console.WriteLine("To be implemented.");
+                //DisplayCustomerOrders();
                 break;
             case 6:
                 Console.WriteLine("To be implemented.");
@@ -70,7 +71,7 @@ while (true)
                 break;
         }
         Console.WriteLine();
-/*    }
+    }
     catch (ArgumentException)
     {
         Console.WriteLine("\nPlease enter an option between 1-6.\n");
@@ -78,7 +79,7 @@ while (true)
     catch
     {
         Console.WriteLine("\nInvalid option entered. Please enter a valid option.\n");
-    }*/
+    }
 }
 
 void InitCustomers()
