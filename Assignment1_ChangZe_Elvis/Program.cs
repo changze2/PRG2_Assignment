@@ -12,6 +12,7 @@ Queue <Order> goldOrderQueue = new Queue<Order>();
 Queue <Order> orderQueue = new Queue<Order>();
 List<string> toppingOptions = new List<string> { "sprinkles", "mochi", "sago", "oreos" };
 List<string> flavourOptions = new List<string> { "vanilla", "chocolate", "strawberry", "durian", "ube", "sea salt" };
+
 InitCustomers();
 InitOrders();
 
@@ -207,21 +208,24 @@ void DisplayCurrentOrders()
         "\n------------------");
     foreach (Order order in goldOrderQueue)
     {
-        Console.WriteLine(order.ToString());
+        order.ToString();
         foreach (IceCream icecream in order.IceCreamList)
         {
             Console.WriteLine(icecream.ToString());
         }
+        Console.WriteLine();
     }
+
     Console.WriteLine("\nNormal Order Queue" +
         "\n------------------");
     foreach (Order order in orderQueue)
     {
-        Console.WriteLine(order.ToString());
+        order.ToString();
         foreach (IceCream icecream in order.IceCreamList)
         {
             Console.WriteLine(icecream.ToString());
         }
+        Console.WriteLine();
     }
 }
 

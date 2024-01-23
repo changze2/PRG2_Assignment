@@ -39,9 +39,7 @@ namespace Assignment1_ChangZe_Elvis
         }
         public override string ToString()
         {
-            string flavoursString = string.Join(", ", Flavours.Select(flavour => flavour.Type));
-            string toppingsString = string.Join(", ", Toppings.Select(topping => topping.Type));
-            return $"Option: {Option}\tScoops: {Scoop}\tFlavours: {flavoursString}\tToppings: {toppingsString}";
+            return base.ToString();
         }
     }
 }

@@ -28,7 +28,8 @@ namespace Assignment1_ChangZe_Elvis
         {
             string flavoursString = string.Join(", ", Flavours.Select(flavour => flavour.Type));
             string toppingsString = string.Join(", ", Toppings.Select(topping => topping.Type));
-            return $"Option: {Option}\tScoops: {Scoop}\tFlavours: {flavoursString}\tToppings: {toppingsString}";
+            return $"Icecream {Option} with {Scoop} scoops. Flavour(s) are " +
+                $"{flavoursString} with {Toppings.Count} topping(s) of {toppingsString}";
         }
     }
 }
