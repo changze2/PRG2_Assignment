@@ -9,15 +9,17 @@ namespace Assignment1_ChangZe_Elvis
     class Order
     {
         public int Id { get; set; }
+        public int MemberId { get; set; } // added an extra field for conveniency sake
         public DateTime TimeReceived { get; set; }
         public DateTime? TimeFulfilled { get; set; }
         public List<IceCream> IceCreamList { get; set; } = new List<IceCream>();
 
         public Order() { }
-        public Order(int id, DateTime timeReceived)
+        public Order(int id, DateTime timeReceived, int memberId)
         {
             Id = id;
             TimeReceived = timeReceived;
+            MemberId = memberId;
         }
 
         public void ModifyIceCream(int position)
@@ -27,7 +29,7 @@ namespace Assignment1_ChangZe_Elvis
 
         public void AddIceCream(IceCream iceCream)
         {
-
+            IceCreamList.Add(iceCream);
         }
 
         public void DeleteIceCream(int position)
