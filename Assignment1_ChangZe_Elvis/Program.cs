@@ -16,6 +16,13 @@ List<string> flavourOptions = new List<string> { "vanilla", "chocolate", "strawb
 InitCustomers();
 InitOrders();
 
+Console.WriteLine(
+    " _____ _____ _______             _" +
+    "\n|_   _/ ____|__   __|           | |" +
+    "\n  | || |       | |_ __ ___  __ _| |_ ___" +
+    "\n  | || |       | | '__/ _ \\/ _` | __/ __|" +
+    "\n _| || |____   | | | |  __/ (_| | |_\\__ \\" +
+    "\n|_____\\_____|  |_|_|  \\___|\\__,_|\\__|___/\n");
 while (true)
 {
     Menu();
@@ -208,7 +215,7 @@ void DisplayCurrentOrders()
         "\n------------------");
     foreach (Order order in goldOrderQueue)
     {
-        order.ToString();
+        Console.WriteLine(order.ToString());
         foreach (IceCream icecream in order.IceCreamList)
         {
             Console.WriteLine(icecream.ToString());
@@ -220,7 +227,7 @@ void DisplayCurrentOrders()
         "\n------------------");
     foreach (Order order in orderQueue)
     {
-        order.ToString();
+        Console.WriteLine(order.ToString());
         foreach (IceCream icecream in order.IceCreamList)
         {
             Console.WriteLine(icecream.ToString());
