@@ -9,15 +9,17 @@ namespace Assignment1_ChangZe_Elvis
     class Order
     {
         public int Id { get; set; }
+        public int MemberId { get; set; } // added an extra field for conveniency sake
         public DateTime TimeReceived { get; set; }
         public DateTime? TimeFulfilled { get; set; }
         public List<IceCream> IceCreamList { get; set; } = new List<IceCream>();
 
         public Order() { }
-        public Order(int id, DateTime timeReceived)
+        public Order(int id, DateTime timeReceived, int memberId)
         {
             Id = id;
             TimeReceived = timeReceived;
+            MemberId = memberId; // I added an extra field and parameter to the Order to make it more convenient
         }
 
         public void ModifyIceCream(int position)
@@ -48,14 +50,18 @@ namespace Assignment1_ChangZe_Elvis
 
         public override string ToString()
         {
+            string timeFulfilled = "";
             if (TimeFulfilled == null)
             {
-                return $"Order id: {Id}\tTime Received: {TimeReceived}";
+                timeFulfilled = "Awaiting checkout";
             }
             else
             {
-                return $"Order id: {Id}\tTime Received: {TimeReceived}\tTime Fulfilled: {TimeFulfilled}";
+                timeFulfilled = TimeFulfilled.ToString();
             }
+            return $"Order: {Id}" +
+                $"\nTime received: {TimeReceived}" +
+                $"\nTime fulfilled: {timeFulfilled}";
         }
     }
 }
