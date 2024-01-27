@@ -29,15 +29,15 @@ namespace Assignment1_ChangZe_Elvis
             double scoopTotal = 0;
             if (Scoop == 1)
             {
-                scoopTotal = 4.0;
+                scoopTotal = 7.0;
             }
             else if (Scoop == 2)
             {
-                scoopTotal = 5.5;
+                scoopTotal = 8.5;
             }
             else if (Scoop == 3)
             {
-                scoopTotal = 6.5;
+                scoopTotal = 9.5;
             }
             if (WaffleFlavour != "Original")
             {
