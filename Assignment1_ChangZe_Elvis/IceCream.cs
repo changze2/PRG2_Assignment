@@ -44,7 +44,7 @@ namespace Assignment1_ChangZe_Elvis
             }
 
             return $"Icecream {Option} with {Scoop} scoop(s). Flavour(s) " +
-                $"{flavoursString} with {toppingsString}";
+                $"{flavoursString} with {toppingsString}.";
         }
     }
 }

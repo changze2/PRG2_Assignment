@@ -19,7 +19,7 @@ namespace Assignment1_ChangZe_Elvis
         {
             Id = id;
             TimeReceived = timeReceived;
-            MemberId = memberId;
+            MemberId = memberId; // I added an extra field and parameter to the Order to make it more convenient
         }
 
         public void ModifyIceCream(int position)
