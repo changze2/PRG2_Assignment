@@ -32,9 +32,11 @@ namespace Assignment1_ChangZe_Elvis
             IceCreamList.Add(iceCream);
         }
 
-        public void DeleteIceCream(int position)
+        public void DeleteIceCream(int position2)
         {
-
+            IceCream DeleteIC = IceCreamList[position2];
+            Console.WriteLine($"Ice Cream Information: {DeleteIC.ToString()}\n");
+            IceCreamList.Remove(DeleteIC);
         }
         public double CalculateTotal()
         {
