@@ -394,32 +394,59 @@ void ModifyOrderDetails()
     }
     */
     Console.WriteLine();
-    Console.WriteLine(
-        "\n==============================" +
-        "\n            Option" +
-        "\n==============================" +
-        "\n[1] Choose an existing ice cream object to modify" +
-        "\n[2] Add an entirely new ice cream object to the order" +
-        "\n[3] Choose an existing ice cream object to delete from the order" +
-        "\n==============================");
-    Console.Write("Please input your option: ");
-    int option = Convert.ToInt32(Console.ReadLine());
-    if (option == 1)
+    if (customerDict.ContainsKey(selected_id))
     {
-        Console.WriteLine("Please select which ice cream to modify: ");
-        Console.WriteLine("")
-    }
-    else if (option == 2)
-    {
+        Customer selectedCustomer = customerDict[selected_id];
 
-    }
-    else if (option == 3)
-    {
+        if (selectedCustomer.CurrentOrder != null)
+        {
+            Order order = selectedCustomer.CurrentOrder;
 
+            Console.WriteLine(
+            "\n==============================" +
+            "\n            Option" +
+            "\n==============================" +
+            "\n[1] Choose an existing ice cream object to modify" +
+            "\n[2] Add an entirely new ice cream object to the order" +
+            "\n[3] Choose an existing ice cream object to delete from the order" +
+            "\n==============================");
+            Console.Write("Please input your option: ");
+            int option = Convert.ToInt32(Console.ReadLine());
+
+            switch (option)
+            {
+                case 1:
+                    Console.Write("Please enter the ice cream position to modify the ice cream");
+                    int position = Convert.ToInt32(Console.ReadLine());
+                    Console.WriteLine();
+                    order.ModifyIceCream(position - 1);
+                    break;
+                case 2:
+                    CreateCustomerOrder();
+                    break;
+                case 3:
+                    Console.Write("Please enter the ice cream position to modify the ice cream");
+                    int position2 = Convert.ToInt32(Console.ReadLine());
+                    Console.WriteLine();
+                    order.ModifyIceCream(position2 - 1);
+                    break;
+                default:
+                    Console.WriteLine("Invalid option.");
+                    break;
+            }
+        }
+        else
+        {
+            Console.WriteLine("The selected customer has no current order.");
+        }
+    }
+    else
+    {
+        Console.WriteLine("Invalid customer selection.");
     }
 }
-//New method for appending customer information into csv file
-void AppendCustomerToCsvFile(Customer customer)
+    //New method for appending customer information into csv file
+    void AppendCustomerToCsvFile(Customer customer)
 {
     string relativePath = @"..\..\..\customers.csv";
     string filePath = Path.GetFullPath(relativePath, Directory.GetCurrentDirectory());
