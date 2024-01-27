@@ -156,7 +156,6 @@ void InitOrders()
                 order.IceCreamList.Add(icecream);
                 orderDict[orderId] = order;
                 customerDict[memberId].OrderHistory.Add(order);
-                //OrderQueue(customerDict[memberId], order);
             }
             else
             {
@@ -222,7 +221,8 @@ void DisplayCurrentOrders()
             {
                 Console.WriteLine(icecream.ToString());
             }
-            Console.WriteLine();
+            Console.WriteLine("------------------");
+            Console.WriteLine($"The order total is ${order.CalculateTotal().ToString("0.00")}\n");
         }
     }
 
@@ -241,7 +241,8 @@ void DisplayCurrentOrders()
             {
                 Console.WriteLine(icecream.ToString());
             }
-            Console.WriteLine();
+            Console.WriteLine("------------------");
+            Console.WriteLine($"The order total is ${order.CalculateTotal().ToString("0.00")}\n");
         }
     }
     return;
@@ -311,6 +312,10 @@ void CreateCustomerOrder()
     try
     {
         int id = Convert.ToInt32(Console.ReadLine());
+        if (!customerDict.ContainsKey(id))
+        {
+            throw new ArgumentException("Please enter a valid customer id.");
+        }
         Customer customer = customerDict[id];
         int orderId = orderDict.Count + 1;
         while (true)
@@ -340,7 +345,7 @@ void CreateCustomerOrder()
             {
                 Console.WriteLine($"\nScoop {i + 1}");
                 Console.Write("Enter flavour of icecream: ");
-                string flavour = Console.ReadLine();
+                string flavour = Console.ReadLine().Trim().ToLower();
                 if (!flavourOptions.Contains(flavour))
                 {
                     throw new ArgumentException("Please enter a valid flavour.");
@@ -389,7 +394,7 @@ void CreateCustomerOrder()
                 {
                     throw new ArgumentException("Please enter a valid topping.");
                 }
-                else if (toppings == "none")
+                if (toppings == "none")
                 {
                     break;
                 }
@@ -407,6 +412,8 @@ void CreateCustomerOrder()
             }
             if (repeat == "n")
             {
+                Console.WriteLine("Order has been created successfully.");
+                Console.WriteLine($"The current price stands at ${order.CalculateTotal().ToString("0.00")}");
                 customer.CurrentOrder = order;
                 orderDict[orderId] = order;
                 OrderQueue(customer, order);
