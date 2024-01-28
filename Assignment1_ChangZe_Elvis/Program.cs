@@ -35,7 +35,7 @@ while (true)
         Console.Write("Enter option: ");
         int option = Convert.ToInt16(Console.ReadLine().Trim());
 
-        if (option < 0 || option > 6)
+        if (option < 0 || option > 7)
         {
             throw new ArgumentException();
         }
@@ -65,23 +65,21 @@ while (true)
                 CreateCustomerOrder();
                 break;
             case 5:
-                Console.WriteLine("To be implemented.");
-                //DisplayCustomerOrders();
+                DisplayCustomerOrders();
                 break;
             case 6:
                 Console.WriteLine("To be implemented.");
                 //ModifyOrderDetails();
                 break;
             case 7:
-                Console.WriteLine("To be implemented.");
-                //ProcessNCheckOut();
+                ProcessNCheckOut();
                 break;
         }
         Console.WriteLine();
     }
     catch (ArgumentException)
     {
-        Console.WriteLine("\nPlease enter an option between 1-6.\n");
+        Console.WriteLine("\nPlease enter an option between 1-7.\n");
     }
     catch
     {
@@ -563,18 +561,19 @@ void ProcessNCheckOut()
     if (goldOrderQueue.Count > 0)
     {
         Order goldOrder = goldOrderQueue.Dequeue();
-        // Implement any additional logic for processing gold orders
+        DisplayOrderDetails(goldOrder);
+        ProcessOrder(goldOrder);
     }
     else if (orderQueue.Count > 0)
     {
         Order normalOrder = orderQueue.Dequeue();
-        // Implement any additional logic for processing normal orders
+        DisplayOrderDetails(normalOrder);
+        ProcessOrder(normalOrder);
     }
     else
     {
         Console.WriteLine("No orders in the queues.");
     }
-
 }
     //New method for appending customer information into csv file
     void AppendCustomerToCsvFile(Customer customer)
@@ -705,4 +704,113 @@ string CapitaliseStr(string str)
 {
     string str1 = char.ToUpper(str[0]) + str.Substring(1);
     return str1;
+}
+
+void DisplayOrderDetails(Order order)
+{
+    Console.WriteLine($"Order ID: {order.Id}");
+    Console.WriteLine($"Member ID: {order.MemberId}");
+    Console.WriteLine($"Time Received: {order.TimeReceived.ToString("dd/MM/yyyy HH:mm")}");
+    Console.WriteLine("Ice Creams in the Order:");
+    foreach (IceCream iceCream in order.IceCreamList)
+    {
+        Console.WriteLine(iceCream.ToString());
+    }
+}
+
+void ProcessOrder(Order order)
+{
+    double totalBill = order.CalculateTotal();
+    Console.WriteLine($"Total Bill Amount: ${totalBill.ToString("0.00")}");
+    Customer customer = customerDict[order.MemberId];
+    string membershipStatus = customer.Rewards.Tier;
+    Console.WriteLine($"Membership status: {membershipStatus}");
+    string membershipPoint = Convert.ToString(customer.Rewards.Points);
+    Console.WriteLine($"Membership point: {membershipPoint}");
+    if (customer.IsBirthday())
+    {
+        // Calculate the final bill while having the most expensive ice cream cost $0.00
+        IceCream mostExpensiveIceCream = order.IceCreamList.OrderByDescending(ic => ic.CalculatePrice()).First();
+        totalBill -= mostExpensiveIceCream.CalculatePrice();
+        Console.WriteLine($"It's the customer's birthday! The most expensive ice cream is free.");
+    }
+    if (customer.Rewards.PunchCard >= 10)
+    {
+        // Set the cost of the first ice cream to $0.00
+        if (order.IceCreamList.Count > 0)
+        {
+            IceCream firstIceCream = order.IceCreamList[0];
+            totalBill -= firstIceCream.CalculatePrice();
+
+            // Reset the punch card back to 0
+            customer.Rewards.PunchCard = 0;
+        }
+    }
+    else
+    {
+        customer.Rewards.PunchCard += order.IceCreamList.Count;
+    }
+
+    if (IsSilverOrGoldMember(customer) && customer.Rewards.Points > 0)
+    {
+        Console.Write("How many points would you like to redeem? ");
+        int redeemPoints = Convert.ToInt32(Console.ReadLine());
+
+        // Check if the customer has enough points to redeem
+        if (redeemPoints <= customer.Rewards.Points)
+        {
+            // Calculate the discount based on the redeemed points
+            double discount = redeemPoints * 0.02;
+
+            // Adjust the total bill by subtracting the discount
+            totalBill -= discount;
+
+            // Display information about redeemed points
+            Console.WriteLine($"You redeemed {redeemPoints} points, saving ${discount:0.00}.");
+        }
+        else
+        {
+            Console.WriteLine("You don't have enough points to redeem.");
+        }
+    }
+    // Display the final bill amount
+    Console.WriteLine($"Your final bill amount is ${totalBill:0.00}");
+    // Prompt user to press any key to make payment
+    Console.Write("Press any key to make payment...");
+    // Calculate points based on the total amount paid
+    int earnedPoints = (int)Math.Floor(totalBill * 0.72);
+
+    // Increment customer's points
+    customer.Rewards.Points += earnedPoints;
+
+    // Check for membership tier promotions
+    if (customer.Rewards.Points >= 100 && customer.Rewards.Tier == "Gold")
+    {
+        // Customer is already a Gold member
+        Console.WriteLine("Congratulations! You are already a Gold member.");
+    }
+    else if (customer.Rewards.Points >= 100)
+    {
+        // Promote the customer to Gold member
+        customer.Rewards.Tier = "Gold";
+        Console.WriteLine("Congratulations! You are now a Gold member.");
+    }
+    else if (customer.Rewards.Points >= 50 && customer.Rewards.Tier == "Silver")
+    {
+        // Customer is already a Silver member
+        Console.WriteLine("Congratulations! You are already a Silver member.");
+    }
+    else if (customer.Rewards.Points >= 50)
+    {
+        // Promote the customer to Silver member
+        customer.Rewards.Tier = "Silver";
+        Console.WriteLine("Congratulations! You are now a Silver member.");
+    }
+    //Console.WriteLine($"Time Fulfilled: {order.timeFulfilled.ToString("dd/MM/yyyy HH:mm")}");
+}
+
+bool IsSilverOrGoldMember(Customer customer)
+{
+    // Check if the customer is silver or gold
+    return customer.Rewards.Tier == "Silver" || customer.Rewards.Tier == "Gold";
 }
