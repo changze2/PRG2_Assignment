@@ -35,7 +35,7 @@ while (true)
         Console.Write("Enter option: ");
         int option = Convert.ToInt16(Console.ReadLine().Trim());
 
-        if (option < 0 || option > 7)
+        if (option < 0 || option > 8)
         {
             throw new ArgumentException();
         }
@@ -74,12 +74,15 @@ while (true)
             case 7:
                 ProcessNCheckOut();
                 break;
+            case 8:
+                DisplayMonthlyAndYearAmount();
+                break;
         }
         Console.WriteLine();
     }
     catch (ArgumentException)
     {
-        Console.WriteLine("\nPlease enter an option between 1-7.\n");
+        Console.WriteLine("\nPlease enter an option between 1-8.\n");
     }
     catch
     {
@@ -575,8 +578,38 @@ void ProcessNCheckOut()
         Console.WriteLine("No orders in the queues.");
     }
 }
-    //New method for appending customer information into csv file
-    void AppendCustomerToCsvFile(Customer customer)
+
+//Option 8 Display monthly charged amounts breakdown & total charged amounts for the year
+void DisplayMonthlyAndYearAmount()
+{
+    Customer customer = new Customer();
+    Console.Write("Enter the year: ");
+    int promptyear = Convert.ToInt32(Console.ReadLine());
+    // Create an array to store monthly amounts
+    double[] monthlyAmounts = new double[12];
+    foreach (var order in customer.OrderHistory)
+    {
+        if (order.TimeFulfilled.Value.Year == promptyear)
+        {
+            int month = order.TimeFulfilled.Value.Month - 1;
+            monthlyAmounts[month] += order.CalculateTotal();
+        }
+    }
+    Console.WriteLine($"Monthly Charged Amounts Breakdown for {promptyear}:");
+    for (int i = 0; i < 12; i++)
+    {
+        Console.WriteLine($"{CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(i + 1)} {promptyear}: ${monthlyAmounts[i]:F2}");
+    }
+    double totalAmount = 0;
+    foreach (double amount in monthlyAmounts)
+    {
+        totalAmount += amount;
+    }
+
+    Console.WriteLine($"Total Charged Amount for {promptyear}: ${totalAmount:F2}");
+}
+//New method for appending customer information into csv file
+void AppendCustomerToCsvFile(Customer customer)
 {
     string relativePath = @"..\..\..\customers.csv";
     string filePath = Path.GetFullPath(relativePath, Directory.GetCurrentDirectory());
