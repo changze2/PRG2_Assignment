@@ -65,8 +65,7 @@ while (true)
                 CreateCustomerOrder();
                 break;
             case 5:
-                Console.WriteLine("To be implemented.");
-                //DisplayCustomerOrders();
+                DisplayCustomerOrders();
                 break;
             case 6:
                 Console.WriteLine("To be implemented.");
@@ -208,28 +207,21 @@ void DisplayCurrentOrders()
         return;
     }
     Console.WriteLine("Gold Order Queue" +
-        "\n------------------");
+        "\n===================");
     if (goldOrderQueue.Count == 0)
     {
         Console.WriteLine("No orders.");
     }
     else
     {
-        Console.WriteLine("------------------");
         foreach (Order order in goldOrderQueue)
         {
-            Console.WriteLine(order.ToString());
-            foreach (IceCream icecream in order.IceCreamList)
-            {
-                Console.WriteLine(icecream.ToString());
-            }
-            Console.WriteLine("------------------");
-            Console.WriteLine($"The order total is ${order.CalculateTotal().ToString("0.00")}\n");
+            DisplayOrder(order);
         }
     }
 
     Console.WriteLine("\nNormal Order Queue" +
-        "\n------------------");
+        "\n===================");
     if (orderQueue.Count == 0)
     {
         Console.WriteLine("No orders.");
@@ -238,13 +230,7 @@ void DisplayCurrentOrders()
     {
         foreach (Order order in orderQueue)
         {
-            Console.WriteLine(order.ToString());
-            foreach (IceCream icecream in order.IceCreamList)
-            {
-                Console.WriteLine(icecream.ToString());
-            }
-            Console.WriteLine("------------------");
-            Console.WriteLine($"The order total is ${order.CalculateTotal().ToString("0.00")}\n");
+            DisplayOrder(order);
         }
     }
     return;
@@ -360,12 +346,12 @@ void CreateCustomerOrder()
                 {
                     dipped = true;
                 }
-                icecream = new Cone(option, scoops, flavourList, toppingsList, dipped);
+                icecream = new Cone(CapitaliseStr(option), scoops, flavourList, toppingsList, dipped);
                 Console.WriteLine();
             }
             else if (option == "cup")
             {
-                icecream = new Cup(option, scoops, flavourList, toppingsList);
+                icecream = new Cup(CapitaliseStr(option), scoops, flavourList, toppingsList);
             }
             Console.Write("Enter number of icecream scoops (1-3): ");
             if (!int.TryParse(Console.ReadLine(),out scoops))
@@ -445,7 +431,7 @@ void CreateCustomerOrder()
     }
     catch (Exception ex)
     {
-        Console.WriteLine("An unexpected error while making order.");
+        Console.WriteLine("An unexpected error occurred while making order.");
     }
 }
 
@@ -453,18 +439,37 @@ void CreateCustomerOrder()
 void DisplayCustomerOrders()
 {
     DisplayCustomerInfo();
-    Console.WriteLine();
-    Console.Write("Please input customer id (e.g 123456) to select the customer: ");
-    int selected_id = Convert.ToInt32(Console.ReadLine());
-    Console.WriteLine();
-    foreach (Order orders in customerDict[selected_id].OrderHistory)
+    Console.Write("\nPlease enter id to select the customer (e.g 123456): ");
+    try
     {
-        Console.WriteLine(orders.ToString());
-        foreach (IceCream iceCream in orders.IceCreamList)
+        if (!int.TryParse(Console.ReadLine(), out int selected_id))
         {
-            Console.WriteLine(iceCream.ToString());
+            throw new ArgumentException("Please enter a valid customer id.");
         }
         Console.WriteLine();
+        foreach (Order order in orderDict.Values)
+        {
+            if (order.MemberId == selected_id)
+            {
+                Console.WriteLine(order.ToString());
+                foreach (IceCream iceCream in order.IceCreamList)
+                {
+                    Console.WriteLine(iceCream.ToString()+"\n");
+                }
+                Console.WriteLine("-------------------------");
+                Console.WriteLine($"The order total is " +
+                    $"${order.CalculateTotal().ToString("0.00")}\n");
+            }
+        }
+
+    }
+    catch (ArgumentException ex) 
+    {
+        Console.WriteLine(ex.Message);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("An unexpected error occurred.");
     }
 }
 
@@ -662,6 +667,24 @@ void DisplayWaffleFlavours()
         Console.WriteLine($"{CapitaliseStr(waffleFlavour),-10} | +$3.00");
     }
     return;
+}
+
+void DisplayOrder(Order order)
+{
+    Console.WriteLine("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    Console.WriteLine(order.ToString());
+    foreach (IceCream icecream in order.IceCreamList)
+    {
+        if (order.IceCreamList.IndexOf(icecream) == (order.IceCreamList.Count-1))
+        {
+            Console.WriteLine(icecream.ToString());
+            break;
+        }
+        Console.WriteLine(icecream.ToString() + "\n");
+    }
+    Console.WriteLine("-----------------------------------");
+    Console.WriteLine($"The order total is ${order.CalculateTotal().ToString("0.00")}");
+    Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 }
 
 void OrderQueue(Customer customer, Order order)

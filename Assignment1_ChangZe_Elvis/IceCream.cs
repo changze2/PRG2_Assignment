@@ -26,25 +26,16 @@ namespace Assignment1_ChangZe_Elvis
 
         public override string ToString()
         {
-            string toppingsString = "";
-            if (Toppings.Count == 0)
+            string toppingsString = "0 toppings";
+            if (Toppings.Count != 0)
             {
-                toppingsString = "no toppings";
-            }
-            else
-            {
-                toppingsString = $"{Toppings.Count} topping(s) of {toppingsString}" +
+                toppingsString = $"{Toppings.Count} topping(s) of " +
                     string.Join(", ", Toppings.Select(topping => topping.Type));
             }
-            string flavoursString = "are " + string.Join(", ", Flavours.Select(flavour => flavour.Type));
-            
-            if (Flavours.Count == 1)
-            {
-                flavoursString = flavoursString.Replace("are", "is");
-            }
-
-            return $"Icecream {Option} with {Scoop} scoop(s). Flavour(s) " +
-                $"{flavoursString} with {toppingsString}.";
+            string flavoursString = $"{Flavours.Count} flavour(s) of " +
+                string.Join(", ", Flavours.Select(flavour => flavour.Type));
+            return $"{Option} Icecream with {Scoop} scoop(s)" +
+                $"\n{flavoursString}\n{toppingsString}";
         }
     }
 }
