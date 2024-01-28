@@ -72,6 +72,10 @@ while (true)
                 Console.WriteLine("To be implemented.");
                 //ModifyOrderDetails();
                 break;
+            case 7:
+                Console.WriteLine("To be implemented.");
+                //ProcessNCheckOut();
+                break;
         }
         Console.WriteLine();
     }
@@ -179,6 +183,7 @@ void Menu()
         "\n[4] Create order" +
         "\n[5] Display order details" +
         "\n[6] Modify order" +
+        "\n[7] Checkout" +
         "\n[0] Exit program" +
         "\n------------------------------");
 }
@@ -549,6 +554,27 @@ void ModifyOrderDetails()
     {
         Console.WriteLine("Invalid customer selection.");
     }
+}
+
+//Option 7 Process an order and checkout
+void ProcessNCheckOut()
+{
+    // Check if there are gold orders in the queue
+    if (goldOrderQueue.Count > 0)
+    {
+        Order goldOrder = goldOrderQueue.Dequeue();
+        // Implement any additional logic for processing gold orders
+    }
+    else if (orderQueue.Count > 0)
+    {
+        Order normalOrder = orderQueue.Dequeue();
+        // Implement any additional logic for processing normal orders
+    }
+    else
+    {
+        Console.WriteLine("No orders in the queues.");
+    }
+
 }
     //New method for appending customer information into csv file
     void AppendCustomerToCsvFile(Customer customer)
