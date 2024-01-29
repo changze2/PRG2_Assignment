@@ -59,9 +59,9 @@ namespace Assignment1_ChangZe_Elvis
             {
                 timeFulfilled = TimeFulfilled.ToString();
             }
-            return $"Order: {Id}" +
-                $"\nTime received: {TimeReceived}" +
-                $"\nTime fulfilled: {timeFulfilled}";
+            return $"{$"|Order: {Id}",-59}|" +
+                $"\n{$"|Time received: {TimeReceived}",-59}|" +
+                $"\n{$"|Time fulfilled: {timeFulfilled}",-59}|";
         }
     }
 }

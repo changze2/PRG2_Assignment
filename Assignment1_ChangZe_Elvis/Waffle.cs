@@ -47,7 +47,7 @@ namespace Assignment1_ChangZe_Elvis
         }
         public override string ToString()
         {
-            return base.ToString() + $"\nWaffle flavour is {WaffleFlavour}";
+            return base.ToString() + $"\n{$"|Waffle flavour is {WaffleFlavour}",-59}|";
         }
     }
 }

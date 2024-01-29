@@ -34,8 +34,9 @@ namespace Assignment1_ChangZe_Elvis
             }
             string flavoursString = $"{Flavours.Count} flavour(s) of " +
                 string.Join(", ", Flavours.Select(flavour => flavour.Type));
-            return $"{Option} Icecream with {Scoop} scoop(s)" +
-                $"\n{flavoursString}\n{toppingsString}";
+
+            return $"{$"|{Option} Icecream with {Scoop} scoop(s)",-59}|" +
+                $"\n|{flavoursString,-58}|\n|{toppingsString,-58}|";
         }
     }
 }

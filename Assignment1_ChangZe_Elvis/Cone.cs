@@ -58,7 +58,7 @@ namespace Assignment1_ChangZe_Elvis
             {
                 dipped = "not";
             }
-            return base.ToString() + $"\nCone is {dipped} dipped.";
+            return base.ToString() + $"\n{$"|Cone is {dipped} dipped.",-59}|";
         }
     }
 }

@@ -222,9 +222,7 @@ void DisplayCurrentOrders()
     {
         foreach (Order order in goldOrderQueue)
         {
-            Console.WriteLine("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             DisplayOrder(order);
-            Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         }
     }
 
@@ -238,9 +236,7 @@ void DisplayCurrentOrders()
     {
         foreach (Order order in orderQueue)
         {
-            Console.WriteLine("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             DisplayOrder(order);
-            Console.WriteLine("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         }
     }
     return;
@@ -367,7 +363,6 @@ void DisplayCustomerOrders()
             if (order.MemberId == id)
             {
                 haveOrder = true;
-                Console.WriteLine();
                 DisplayOrder(order);
             }
         }
@@ -404,15 +399,15 @@ void ModifyOrderDetails()
         }
         Order order = selectedCustomer.CurrentOrder;
 
-        Console.WriteLine(
+        Console.Write(
         "\n==============================" +
         "\n            Option" +
         "\n==============================" +
         "\n[1] Choose an existing ice cream object to modify" +
         "\n[2] Add an entirely new ice cream object to the order" +
         "\n[3] Choose an existing ice cream object to delete from the order" +
-        "\n==============================");
-        Console.Write("Please input your option: ");
+        "\n==============================" +
+        "\nPlease input your option: ");
         if (!int.TryParse(Console.ReadLine(), out int option))
         {
             throw new ArgumentException("Please enter a valid option.");
@@ -496,6 +491,7 @@ void DisplayMonthlyAndYearAmount()
 
     Console.WriteLine($"Total Charged Amount for {promptyear}: ${totalAmount:F2}");
 }
+
 //New method for appending customer information into csv file
 void AppendCustomerToCsvFile(Customer customer)
 {
@@ -612,6 +608,7 @@ void DisplayWaffleFlavours()
 
 void DisplayOrder(Order order)
 {
+    Console.WriteLine("\n------------------------------------------------------------");
     Console.WriteLine(order.ToString());
     foreach (IceCream icecream in order.IceCreamList)
     {
@@ -620,10 +617,11 @@ void DisplayOrder(Order order)
             Console.WriteLine(icecream.ToString());
             break;
         }
-        Console.WriteLine(icecream.ToString() + "\n");
+        Console.WriteLine(icecream.ToString()+$"\n|{" ",-58}|");
     }
-    Console.WriteLine("-----------------------------------");
-    Console.WriteLine($"The order total is ${order.CalculateTotal().ToString("0.00")}");
+    Console.WriteLine("|----------------------------------------------------------|");
+    Console.WriteLine($"|{$"The order total is ${order.CalculateTotal().ToString("0.00")}",-58}|");
+    Console.WriteLine("------------------------------------------------------------");
 }
 
 void OrderQueue(Customer customer, Order order)
@@ -796,7 +794,8 @@ void ProcessOrder(Order order)
     // Display the final bill amount
     Console.WriteLine($"Your final bill amount is ${totalPrice:0.00}");
     // Prompt user to press any key to make payment
-    Console.Write("Press any key to make payment...");
+    Console.WriteLine("Press any key to make payment...");
+    Console.ReadKey();
     // Calculate points based on the total amount paid
     int earnedPoints = (int)Math.Floor(totalPrice * 0.72);
 
