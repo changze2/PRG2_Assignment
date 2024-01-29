@@ -74,7 +74,7 @@ while (true)
                 ProcessNCheckOut();
                 break;
             case 8:
-                DisplayMonthlyAndYearAmount();
+                DisplayMonthlyAndYearAmount(customerDict, orderDict);
                 break;
         }
         Console.WriteLine();
@@ -463,33 +463,38 @@ void ProcessNCheckOut()
 }
 
 //Option 8 Display monthly charged amounts breakdown & total charged amounts for the year
-void DisplayMonthlyAndYearAmount()
+void DisplayMonthlyAndYearAmount(Dictionary<int, Customer> customerDict, Dictionary<int, Order> orderDict)
 {
-    Customer customer = new Customer();
     Console.Write("Enter the year: ");
     int promptyear = Convert.ToInt32(Console.ReadLine());
-    // Create an array to store monthly amounts
-    double[] monthlyAmounts = new double[12];
-    foreach (var order in customer.OrderHistory)
+    Dictionary<int, double> monthlytotaldict = new Dictionary<int, double>();
+    for(int month = 1; month <= 12; month++)
     {
-        if (order.TimeFulfilled.Value.Year == promptyear)
+        monthlytotaldict[month] = 0;
+    }
+    foreach (Customer customer in customerDict.Values)
+    {
+        foreach(Order order in customer.OrderHistory)
         {
-            int month = order.TimeFulfilled.Value.Month - 1;
-            monthlyAmounts[month] += order.CalculateTotal();
+            if(order.TimeFulfilled.HasValue)
+            {
+                if(order.TimeFulfilled.Value.Year == promptyear)
+                {
+                    int month = order.TimeFulfilled.Value.Month;
+                    monthlytotaldict[month] += order.CalculateTotal();
+                }
+            }
         }
     }
-    Console.WriteLine($"Monthly Charged Amounts Breakdown for {promptyear}:");
-    for (int i = 0; i < 12; i++)
+    double totalamount = 0;
+    for(int month = 1; month <= 12; month++)
     {
-        Console.WriteLine($"{CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(i + 1)} {promptyear}: ${monthlyAmounts[i]:F2}");
-    }
-    double totalAmount = 0;
-    foreach (double amount in monthlyAmounts)
-    {
-        totalAmount += amount;
+        string monthyname = new DateTime(promptyear, month, 1).ToString("MMM yyyy");
+        Console.WriteLine("{0}: ${1:F2}", monthyname, monthlytotaldict[month]);
+        totalamount += monthlytotaldict[month];
     }
 
-    Console.WriteLine($"Total Charged Amount for {promptyear}: ${totalAmount:F2}");
+    Console.WriteLine($"Total Charged Amount for {promptyear}: ${totalamount:F2}");
 }
 
 //New method for appending customer information into csv file
@@ -801,6 +806,8 @@ void ProcessOrder(Order order)
 
     // Increment customer's points
     customer.Rewards.Points += earnedPoints;
+
+    Console.WriteLine($"Earned Points: ");
 
     // Check for membership tier promotions
     if (customer.Rewards.Points >= 100 && customer.Rewards.Tier == "Gold")
