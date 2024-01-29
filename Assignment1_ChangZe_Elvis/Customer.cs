@@ -29,13 +29,10 @@ namespace Assignment1_ChangZe_Elvis
             Dob = DateOnly.FromDateTime(DateTime.Parse(dob));
         }
 
-        public Order MakeOrder() // **
+        public void MakeOrder()
         {
-            Console.Write("Enter your option: ");
-            string option = Console.ReadLine();
-            Console.Write("Enter number of scoops: ");
-            Order order = new Order();
-            return order;
+            // Empty as method is being created inside Program.cs and utilises other methods made in Program.cs
+            // so making it in Program.cs is more convenient and memory-efficient
         } 
 
         public bool IsBirthday()
