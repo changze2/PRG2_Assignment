@@ -22,9 +22,9 @@ namespace Assignment1_ChangZe_Elvis
             MemberId = memberId; // I added an extra field and parameter to the Order to make it more convenient
         }
 
-        public void ModifyIceCream(int position)
+        public void ModifyIceCream(int position, IceCream icecream)
         {
-
+            IceCreamList[position] = icecream;
         }
 
         public void AddIceCream(IceCream iceCream)
@@ -60,6 +60,7 @@ namespace Assignment1_ChangZe_Elvis
                 timeFulfilled = TimeFulfilled.ToString();
             }
             return $"{$"|Order: {Id}",-59}|" +
+                $"\n{$"|Member: {MemberId}",-59}|" +
                 $"\n{$"|Time received: {TimeReceived}",-59}|" +
                 $"\n{$"|Time fulfilled: {timeFulfilled}",-59}|";
         }

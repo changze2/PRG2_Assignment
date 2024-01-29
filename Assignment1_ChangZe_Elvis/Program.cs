@@ -209,7 +209,7 @@ void DisplayCurrentOrders()
 {
     if (goldOrderQueue.Count == 0 && orderQueue.Count == 0)
     {
-        Console.WriteLine("No orders has been made.");
+        Console.WriteLine("No orders have been made.");
         return;
     }
     Console.WriteLine("Gold Order Queue" +
@@ -286,7 +286,7 @@ void RegisterCustomer()
         newCustomer.Rewards = newPointCard;
         Console.WriteLine("Registration Successful!");
         customerDict.Add(id, newCustomer);
-        AppendCustomerToCsvFile(newCustomer);
+        UpdateCustomerCsvFile(newCustomer);
     }
     catch (ArgumentException ex)
     {
@@ -310,6 +310,10 @@ void CreateCustomerOrder()
             throw new ArgumentException("Please enter a valid customer id.");
         }
         Customer customer = customerDict[id];
+        if (customer.CurrentOrder !=  null)
+        {
+            throw new ArgumentException("Please checkout before ordering again.");
+        }
         int orderId = orderDict.Count + 1;
         Order order = new Order(orderId, DateTime.Now, id);
         while (true)
@@ -398,7 +402,8 @@ void ModifyOrderDetails()
             throw new ArgumentException($"No orders made by {selectedCustomer.Name}.");
         }
         Order order = selectedCustomer.CurrentOrder;
-
+        Console.Write("\nYour current order is:");
+        DisplayOrder(order);
         Console.Write(
         "\n==============================" +
         "\n            Option" +
@@ -407,32 +412,66 @@ void ModifyOrderDetails()
         "\n[2] Add an entirely new ice cream object to the order" +
         "\n[3] Choose an existing ice cream object to delete from the order" +
         "\n==============================" +
-        "\nPlease input your option: ");
+        "\n\nEnter your option: ");
         if (!int.TryParse(Console.ReadLine(), out int option))
         {
             throw new ArgumentException("Please enter a valid option.");
         }
+        Console.WriteLine();
         switch (option)
         {
             case 1:
-                Console.Write("\nPlease enter the ice cream position to modify the ice cream: ");
-                int position = Convert.ToInt32(Console.ReadLine());
+                for (int i = 0; i < order.IceCreamList.Count; i++)
+                {
+                    IceCream icecreamOld = order.IceCreamList[i];
+                    Console.WriteLine($"[{i + 1}]: {icecreamOld.Option} icecream" +
+                        $", {icecreamOld.Flavours.Count} flavour(s)" +
+                        $", {icecreamOld.Toppings.Count} topping(s)");
+                }
+                Console.Write("\nEnter the ice cream position for modification: ");
+                if (!int.TryParse(Console.ReadLine(), out int positionMod))
+                {
+                    throw new ArgumentException("Please enter a valid position.");
+                }
                 Console.WriteLine();
-                order.ModifyIceCream(position - 1);
+                IceCream icecreamNew = CreateIceCream();
+                order.ModifyIceCream(positionMod - 1, icecreamNew);
+                Console.WriteLine("Icecream has been modified.");
                 break;
+
             case 2:
-                CreateIceCream();
+                IceCream icecream = CreateIceCream();
+                order.AddIceCream(icecream);
+                Console.WriteLine("Icecream has been added.");
                 break;
+
             case 3:
-                Console.Write("Please enter the ice cream position to delete the ice cream: ");
-                int position2 = Convert.ToInt32(Console.ReadLine());
+                if (order.IceCreamList.Count == 1)
+                {
+                    throw new ArgumentException("Sorry, you cannot have 0 icecreams in your order.");
+                }
+                for (int i = 0; i < order.IceCreamList.Count; i++)
+                {
+                    IceCream icecreamOld = order.IceCreamList[i];
+                    Console.WriteLine($"[{i + 1}]: {icecreamOld.Option} icecream" +
+                        $", {icecreamOld.Flavours.Count} flavour(s)" +
+                        $", {icecreamOld.Toppings.Count} topping(s)");
+                }
+                Console.Write("\nEnter the ice cream position for deletion: ");
+                if (!int.TryParse(Console.ReadLine(), out int positionDel))
+                {
+                    throw new ArgumentException("Please enter a valid position.");
+                }
                 Console.WriteLine();
-                order.ModifyIceCream(position2 - 1);
+                order.DeleteIceCream(positionDel - 1);
+                Console.WriteLine("Icecream has been deleted.");
                 break;
+
             default:
-                Console.WriteLine("Please enter an option from 1-3.");
-                break;
+                throw new ArgumentException("Please enter an option from 1-3.");
         }
+        Console.Write("\nYour modified order is:");
+        DisplayOrder(order);
     }
     catch (ArgumentException ex)
     {
@@ -443,6 +482,10 @@ void ModifyOrderDetails()
 //Option 7 Process an order and checkout
 void ProcessNCheckOut()
 {
+    if (goldOrderQueue == null && orderQueue == null)
+    {
+        throw new ArgumentException("No orders have been made.");
+    }
     // Check if there are gold orders in the queue
     if (goldOrderQueue.Count > 0)
     {
@@ -455,10 +498,6 @@ void ProcessNCheckOut()
         Order normalOrder = orderQueue.Dequeue();
         DisplayOrder(normalOrder);
         ProcessOrder(normalOrder);
-    }
-    else
-    {
-        Console.WriteLine("No orders in the queues.");
     }
 }
 
@@ -498,7 +537,7 @@ void DisplayMonthlyAndYearAmount(Dictionary<int, Customer> customerDict, Diction
 }
 
 //New method for appending customer information into csv file
-void AppendCustomerToCsvFile(Customer customer)
+void UpdateCustomerCsvFile(Customer customer)
 {
     string relativePath = @"..\..\..\customers.csv";
     string filePath = Path.GetFullPath(relativePath, Directory.GetCurrentDirectory());
@@ -509,7 +548,7 @@ void AppendCustomerToCsvFile(Customer customer)
 }
 
 //New method for appending customer information into csv file
-void AppendOrderToCsvFile(Order order)
+void UpdateOrderCsvFile(Order order)
 {
     string relativePath = @"..\..\..\orders.csv";
     string filePath = Path.GetFullPath(relativePath, Directory.GetCurrentDirectory());
@@ -615,6 +654,7 @@ void DisplayOrder(Order order)
 {
     Console.WriteLine("\n------------------------------------------------------------");
     Console.WriteLine(order.ToString());
+    Console.WriteLine("|----------------------------------------------------------|");
     foreach (IceCream icecream in order.IceCreamList)
     {
         if (order.IceCreamList.IndexOf(icecream) == (order.IceCreamList.Count-1))
@@ -748,7 +788,7 @@ void ProcessOrder(Order order)
     string membershipStatus = customer.Rewards.Tier;
     Console.WriteLine($"Membership status: {membershipStatus}");
     string membershipPoint = Convert.ToString(customer.Rewards.Points);
-    Console.WriteLine($"Membership point: {membershipPoint}");
+    Console.WriteLine($"Membership points: {membershipPoint}");
     if (customer.IsBirthday())
     {
         // Calculate the final bill while having the most expensive ice cream cost $0.00
