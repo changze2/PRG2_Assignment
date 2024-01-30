@@ -465,37 +465,48 @@ void ProcessNCheckOut()
 //Option 8 Display monthly charged amounts breakdown & total charged amounts for the year
 void DisplayMonthlyAndYearAmount(Dictionary<int, Customer> customerDict, Dictionary<int, Order> orderDict)
 {
-    Console.Write("Enter the year: ");
-    int promptyear = Convert.ToInt32(Console.ReadLine());
-    Dictionary<int, double> monthlytotaldict = new Dictionary<int, double>();
-    for(int month = 1; month <= 12; month++)
+    try
     {
-        monthlytotaldict[month] = 0;
-    }
-    foreach (Customer customer in customerDict.Values)
-    {
-        foreach(Order order in customer.OrderHistory)
+        Console.Write("Enter the year: ");
+        if (int.TryParse(Console.ReadLine(), out int promptyear))
         {
-            if(order.TimeFulfilled.HasValue)
+            double totalAmount = 0;
+
+            for (int month = 1; month <= 12; month++)
             {
-                if(order.TimeFulfilled.Value.Year == promptyear)
+                double monthlyTotal = 0;
+
+                foreach (Customer customer in customerDict.Values)
                 {
-                    int month = order.TimeFulfilled.Value.Month;
-                    monthlytotaldict[month] += order.CalculateTotal();
+                    foreach (Order order in customer.OrderHistory)
+                    {
+                        if (order.TimeFulfilled.HasValue && order.TimeFulfilled.Value.Year == promptyear && order.TimeFulfilled.Value.Month == month)
+                        {
+                            monthlyTotal += order.CalculateTotal();
+                        }
+                    }
                 }
+
+                string monthName = new DateTime(promptyear, month, 1).ToString("MMM yyyy");
+                Console.WriteLine($"{monthName}: ${monthlyTotal:F2}");
+
+                totalAmount += monthlyTotal;
             }
+
+            Console.WriteLine($"Total Charged Amount for {promptyear}: ${totalAmount:F2}");
+        }
+        else
+        {
+            Console.WriteLine("Invalid input. Please enter a valid year.");
         }
     }
-    double totalamount = 0;
-    for(int month = 1; month <= 12; month++)
+    catch (Exception ex)
     {
-        string monthyname = new DateTime(promptyear, month, 1).ToString("MMM yyyy");
-        Console.WriteLine("{0}: ${1:F2}", monthyname, monthlytotaldict[month]);
-        totalamount += monthlytotaldict[month];
+        Console.WriteLine($"An error occurred: {ex.Message}");
+        // You might want to log the exception or handle it in a way appropriate for your application.
     }
-
-    Console.WriteLine($"Total Charged Amount for {promptyear}: ${totalamount:F2}");
 }
+
 
 //New method for appending customer information into csv file
 void AppendCustomerToCsvFile(Customer customer)
