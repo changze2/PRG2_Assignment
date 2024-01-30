@@ -6,6 +6,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using static System.Formats.Asn1.AsnWriter;
+
 //This is all collection classes to be created
 Dictionary<int, Customer> customerDict = new Dictionary<int, Customer>(); 
 Dictionary<int, Order> orderDict = new Dictionary<int, Order>();
@@ -16,10 +17,10 @@ List<string> toppingOptions = new List<string> { "sprinkles", "mochi", "sago", "
 List<string> flavourOptions = new List<string> { "vanilla", "chocolate", "strawberry", "durian", "ube", "sea salt" };
 List<string> waffleOptions = new List<string> { "original", "red velvet", "charcoal", "pandan" };
 
-//Initialize the customer and order file method
+// Calling the methods outside the main loop to initialise orders and customers
 InitCustomers();
 InitOrders();
-//Our unique Otto Symbol
+
 Console.WriteLine(
     " _____ _____ _______             _" +
     "\n|_   _/ ____|__   __|           | |" +
@@ -28,19 +29,27 @@ Console.WriteLine(
     "\n _| || |____   | | | |  __/ (_| | |_\\__ \\" +
     "\n|_____\\_____|  |_|_|  \\___|\\__,_|\\__|___/" +
     "\n\nHi I'm Otto, your Friendly Neighbourhood Robot Scooper! Take a look at our options below!");
-//This is where we run a while loop for our program
+
+// This is where we run our main while loop for our program
 while (true)
 {
-    Menu(); //Menu Method called
-    try
+    Menu(); // Menu Method called for each iteration
+
+    try // Using a try catch block to ensure program wont end over unexpected errors
     {
         Console.Write("Enter option: ");
+
+        // Did not do validation for this as if there is any error, it would be catched with an 
+        // error message
         int option = Convert.ToInt16(Console.ReadLine().Trim());
 
-        if (option < 0 || option > 8) //ArgumentException will be triggered if it didn meet the requirement
+        // ArgumentException will be triggered if option is not meet the range 1-8
+        if (option < 0 || option > 8) 
         {
             throw new ArgumentException();
         }
+
+        // Ensure that while loop can be left with exit option
         if (option == 0) 
         {
             Console.WriteLine("Program ended.");
@@ -48,9 +57,9 @@ while (true)
         }
         Console.WriteLine();
 
-        //We chose to use switch case statements as it runs faster than using if else statements. if else statements
-        //run each if statementsin order while switch case statements run the case where the condition
-        //is met, such as input = 1 and so on.
+        //We chose to use switch case statements as it runs faster than using if else statements.
+        //if else statements run each "if" statements in order of implementation, while switch
+        //case statements run the case when the condition is met, such as input = 1 and so on.
         switch (option)
         {
             case 1:
@@ -81,6 +90,8 @@ while (true)
         }
         Console.WriteLine();
     }
+
+    // Catch statements to output appropriate error messages based on what errors occurred.
     catch (ArgumentException)
     {
         Console.WriteLine("\nPlease enter an option between 1-8.\n");
@@ -91,9 +102,11 @@ while (true)
     }
 }
 
-//This method is to read the customers.csv and store the values in customerDict
+//This method is to read the customers.csv and create the relevant customer objects to add
+//to customerDict
 void InitCustomers()
 {
+    // We used StreamReader as it is more efficient since it reads line by line
     using (StreamReader sr = new StreamReader("customers.csv"))
     {
         string? s = sr.ReadLine();
@@ -103,18 +116,26 @@ void InitCustomers()
             string[] line = s.Split(',');
             string name = line[0];
             int id = Convert.ToInt32(line[1]);
-            string dob = line[2];
+
+            // Reasoning for using string for dob is in Customer class implementation
+            DateOnly dob = DateOnly.FromDateTime(DateTime.Parse(line[2]));
             Customer customer = new Customer(name, id, dob);
             customer.Rewards = new PointCard(Convert.ToInt32(line[4]), Convert.ToInt16(line[5]));
             customer.Rewards.Tier = line[3];
             customerDict.Add(id, customer);
+
+            // Since we can assume that there are no null values in the customer.csv, there is
+            // no need to include validation for unexpected values.
         }
     }
 }
 
-//This method is to read the orders.csv and store the values in orderDict
+//This method is to read the orders.csv and create the relevant order objects to add
+//to orderDict
 void InitOrders()
 {
+    // We also used StreamReader for initialising orders as it is more efficient since it reads
+    // line by line
     using (StreamReader sr = new StreamReader("orders.csv"))
     {
         string? s = sr.ReadLine();
@@ -122,22 +143,41 @@ void InitOrders()
         while ((s = sr.ReadLine()) != null)
         {
             string[] line = s.Split(',');
+
+            // Creating all the variables that will not have null values
             int orderId = Convert.ToInt16(line[0]);
             int memberId = Convert.ToInt32(line[1]);
             DateTime timeReceived = Convert.ToDateTime(line[2]);
+
+            // All orders in orders.csv will be completed, so timefulfilled will not be null
             DateTime timeFulfilled = Convert.ToDateTime(line[3]);
             string option = line[4];
             int scoops = Convert.ToInt16(line[5]);
+
+            // Initialising the dipped bool first, and creating it properly if it is not null
             bool dipped = false;
             if (line[6] != "") { dipped = Convert.ToBoolean(line[6]); }
+
+            // Initialising the waffle flavour as a string, since if its null, it would not be printed
             string waffleFlavour = line[7];
+
+            // Creating all the collection classes needed in order to create a proper Customer object which 
+            // has one to many associations to Flavour and Topping classes
             List<Flavour> flavourList = new List<Flavour>();
             List<Topping> toppingsList = new List<Topping>();
+
+            // We had to create a separate string List in order to iterate through it to properly create 
+            // the Flavour and Topping objects
             List<string> flavourStrings = new List<string> { line[8], line[9], line[10] };
             List<string> toppingsStrings = new List<string> { line[11], line[12], line[13], line[14] };
+
+            // Using foreach loops to check if the string is null, if it is not null, then the objects can
+            // be created and added into the proper object Lists
             foreach (string flavour in flavourStrings)
             {
-                if (flavour == "") { continue; }
+                if (flavour == "") { continue; } // Using continue to reiterate if null
+
+                // We created a new method to properly create the flavour by checking if it is premium
                 flavourList.Add(FlavourPremiumCheck(flavour));
             }
             foreach (string topping in toppingsStrings)
@@ -145,7 +185,12 @@ void InitOrders()
                 if (topping == "") { continue; }
                 toppingsList.Add(new Topping(topping));
             }
+
+            // Initialising the icecream object first, since one line only contains information for
+            // one icecream object
             IceCream icecream = null;
+
+            // Using if statements to check which icecream object to create.
             if (option == "Waffle")
             {
                 icecream = new Waffle(option, scoops, flavourList, toppingsList, waffleFlavour);
@@ -154,11 +199,17 @@ void InitOrders()
             {
                 icecream = new Cone(option, scoops, flavourList, toppingsList, dipped);
             }
-            else
+            else // This is for the Cup object
             {
                 icecream = new Cup(option, scoops, flavourList, toppingsList);
             }
-            if (orderDict.ContainsKey(orderId) == false)
+
+            // This is to check if it belongs to an already created object, for example a second icecream
+            // that is in the order
+            // The orderDict was already created outside of the main loop
+            // Using ! before the bool statement (orderDict.ContainsKey(orderId)) means it this block 
+            // will run if the bool statement is false
+            if (!orderDict.ContainsKey(orderId))
             {
                 Order order = new Order(orderId, timeReceived, memberId);
                 order.TimeFulfilled = timeFulfilled;
@@ -166,6 +217,9 @@ void InitOrders()
                 orderDict[orderId] = order;
                 customerDict[memberId].OrderHistory.Add(order);
             }
+
+            // If the icecream object is meant to be added to an exisiting order, so a new order need not
+            // be created
             else
             {
                 orderDict[orderId].TimeFulfilled = timeFulfilled;
@@ -175,7 +229,7 @@ void InitOrders()
     }
 }
 
-//This is a menu method
+//This is the Menu method that prints all the options that can be entered.
 void Menu()
 {
     Console.WriteLine(
@@ -194,7 +248,8 @@ void Menu()
         "\n------------------------------------");
 }
 
-//Option 1 - List all customers
+// Option 1 - List all customers
+// No try catch block is needed since it does not require user input
 void DisplayCustomerInfo()
 {
     Console.WriteLine("================================================================================" +
@@ -202,36 +257,50 @@ void DisplayCustomerInfo()
         "\n================================================================================" +
         $"\n|{"Name",-13} | {"ID",-8} | {"DOB",-11} | {"Tier",-10} | {"Points",-6} | {"Punch Card",-15}|" +
         "\n--------------------------------------------------------------------------------");
+
+    // Using a foreach loop to loop through the customerDict collection class so that the objects can be 
+    // accessed without indexing
     foreach (Customer customer in customerDict.Values)
     {
         Console.WriteLine($"|{customer.Name,-13} | {customer.MemberId,-8} | {customer.Dob,-11} | {customer.Rewards.Tier,-10} | " +
             $"{customer.Rewards.Points,-6} | {customer.Rewards.PunchCard,-15}|");
     }
     Console.WriteLine("--------------------------------------------------------------------------------");
+    return;
 }
 
-//Option 2 - List all current orders
+// Option 2 - List all current orders
+// No try catch block since it does not require user input
 void DisplayCurrentOrders()
 {
+    // This is to check if both queues are empty. If they are, then a message would be printed saying
+    // there is no orders, and it would end the method's runtime
     if (goldOrderQueue.Count == 0 && orderQueue.Count == 0)
     {
         Console.WriteLine("No orders have been made.");
         return;
     }
+
+    // Printing the gold order first
     Console.WriteLine("Gold Order Queue" +
         "\n===================");
+
+    // If the gold order is empty, then it would show no orders and move on to normaml queue
     if (goldOrderQueue.Count == 0)
     {
         Console.WriteLine("No orders.");
     }
     else
     {
+        // Using a foreach loop to loop through the order queue to display the orders using a method created
+        // that helps display the order in proper format
         foreach (Order order in goldOrderQueue)
         {
             DisplayOrder(order);
         }
     }
 
+    // Same thing with the gold order queue
     Console.WriteLine("\nNormal Order Queue" +
         "\n===================");
     if (orderQueue.Count == 0)
@@ -245,60 +314,85 @@ void DisplayCurrentOrders()
             DisplayOrder(order);
         }
     }
-    return;
+    return; 
 }
     
 
 //Option 3 - Register a new customer
 void RegisterCustomer()
 {
+    // Putting the code in a try catch block since user input is needed
     try
     {
-        Console.Write("Enter customer name: ");
-        string name = Console.ReadLine().Trim();
+        Console.Write("Enter your name: ");
+        string name = Console.ReadLine().Trim(); // using .Trim() to remove any trailing whitespaces
 
-        // This line of code will trigger if the name is null or whitespace
+        // This block of code will trigger if the name is null or whitespace
         if (string.IsNullOrWhiteSpace(name))
         {
             throw new ArgumentException("Name cannot be empty or whitespace.");
         }
 
-        // This line of code will trigger if the name is not made of all alphabets
+        // This block of code will trigger if the name is not made of all alphabets
         // the .All(char.IsLetter) function returns a bool if it follows the conditions
         // inside the .All() function
-        else if (name.All(char.IsLetter))
+        else if (!name.All(char.IsLetter))
         {
             throw new ArgumentException("Name can only contain alphabets.");
         }
+
+        // This is to ensure that the outputs are properly formatted.
+        else if (name.Length > 13)
+        {
+            throw new ArgumentException("Sorry, please enter a shorter name.");
+        }
+
         Console.Write("Enter customer id number (e.g 123456): ");
+
+        // Using int.TryParse() to try and convert the user input into an int. An ArgumentException
+        // would occur if the conversion does not work, or if the id is a negative number or not a 6
+        // digit number. It would also reject inputs where starting digit is 0.
         if (!int.TryParse(Console.ReadLine(), out int id) || id <= 0 || id.ToString().Length != 6 )
         {
             throw new ArgumentException("Invalid customer ID. Please follow the examples (e.g 123456).");
         }
+
+        // This to check if the id is already taken by another customer, which prevents duplicates
         else if (customerDict.ContainsKey(id))
         {
             throw new ArgumentException($"Sorry, {id} has already been registered to another customer.");
         }
-        //This line of code reads a customer ID from the console, attempts to parse it into an integer using `int.TryParse`,
-        //and checks if the parsing fails or if the parsed integer is not a positive value. If either condition is true,
-        //it throws an `ArgumentException` with a message indicating that the customer ID is invalid and
-        //provides an example for the correct format (e.g., "123456").
 
         Console.Write("Enter date of birth (DD-MM-YYYY): ");
         string dobString = Console.ReadLine();
-        if (!DateTime.TryParseExact(dobString, "d-M-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dob))
+
+        // Similar to TryParse, we used TryParseExact to ensure that the string entered follows
+        // the exact format of dd-mm-yyyy, however we used d-M-yyyy as it also allows inputs where
+        // the day and month can be entered as single digits. 
+        // The CultureInfo is to ensure that the timezone is the same regardless of which devices 
+        // are running the program as some devices may be running on American time which is in the
+        // MM/dd/yyyy format, while UK uses dd/MM/yyyy which is what is used in this program
+        if (!DateTime.TryParseExact(dobString, "d-M-yyyy", CultureInfo.GetCultureInfo("en-GB"), 
+            DateTimeStyles.None, out DateTime dobDT))
         {
             throw new ArgumentException("Invalid date of birth format. Please use DD-MM-YYYY.");
         }
-        //This condition checks if the DateTime.TryParseExact method fails to parse the dobString using the specified format "dd/MM/yyyy."
-        //If the parsing fails, the method returns false, and the ! operator negates it, making the condition true.
-        //In this case, if the date of birth format is invalid, the block inside the if statement is executed, and an ArgumentException is thrown.
 
-        Customer newCustomer = new Customer(name, id, dob.ToString());
+        // Converting the DateTime to DateOnly, since time is not needed for DOB
+        DateOnly dob = DateOnly.FromDateTime(dobDT);
+
+        // Creating the Customer object as well as the Rewards object since its associated
+        // to Customer
+        Customer newCustomer = new Customer(name, id, dob);
+
+        // All new customers start with 0 points and 0 punch-card with Ordinary tier
         PointCard newPointCard = new PointCard(0, 0);
         newPointCard.Tier = "Ordinary";
         newCustomer.Rewards = newPointCard;
         Console.WriteLine("Registration Successful!");
+
+        // Adding the new customer object into the customerDict collection class, as well as
+        // updating the customers.csv file with another method
         customerDict.Add(id, newCustomer);
         AppendCustomerToCsvFile(newCustomer);
     }
@@ -381,7 +475,7 @@ void DisplayCustomerOrders()
         {
             currentOrder = 1;
         }
-        Console.WriteLine($"{customer.Name} has made {customer.OrderHistory.Count + currentOrder} " +
+        Console.WriteLine($"\n{customer.Name} has made {customer.OrderHistory.Count + currentOrder} " +
             $"order(s).");
         foreach (Order order in orderDict.Values)
         {
@@ -517,14 +611,14 @@ void ProcessNCheckOut()
         if (goldOrderQueue.Count > 0)
         {
             Order goldOrder = goldOrderQueue.Dequeue();
-            Console.Write($"The order being checked out is {goldOrder.Id}");
+            Console.Write($"The order being checked out:");
             DisplayOrder(goldOrder);
             ProcessOrder(goldOrder);
         }
         else if (orderQueue.Count > 0)
         {
             Order normalOrder = orderQueue.Dequeue();
-            Console.Write($"The order being checked out is {normalOrder.Id}");
+            Console.Write($"The order being checked out:");
             DisplayOrder(normalOrder);
             ProcessOrder(normalOrder);
         }
@@ -875,7 +969,7 @@ void ProcessOrder(Order order)
         totalPrice -= mostExpensiveIceCream.CalculatePrice();
         Console.WriteLine($"It's the customer's birthday! The most expensive icecream is free of charge!");
     }
-    if (customer.Rewards.PunchCard >= 10 || !customer.IsBirthday())
+    if (customer.Rewards.PunchCard >= 10 && !customer.IsBirthday())
     {
         // Set the cost of the first ice cream to $0.00
         IceCream punchedIceCream = order.IceCreamList[0];
