@@ -251,12 +251,20 @@ void RegisterCustomer()
     {
         Console.Write("Enter customer name: ");
         string name = Console.ReadLine().Trim();
+
+        // This line of code will trigger if the name is null or whitespace
         if (string.IsNullOrWhiteSpace(name))
         {
             throw new ArgumentException("Name cannot be empty or whitespace.");
         }
-        //This line of code will trigger if the name is null or whitespace
 
+        // This line of code will trigger if the name is not made of all alphabets
+        // the .All(char.IsLetter) function returns a bool if it follows the conditions
+        // inside the .All() function
+        else if (name.All(char.IsLetter))
+        {
+            throw new ArgumentException("Name can only contain alphabets.");
+        }
         Console.Write("Enter customer id number (e.g 123456): ");
         if (!int.TryParse(Console.ReadLine(), out int id) || id <= 0 || id.ToString().Length != 6 )
         {
@@ -362,7 +370,14 @@ void DisplayCustomerOrders()
             throw new ArgumentException("Please enter a valid customer id.");
         }
         bool haveOrder = false;
-        string name = customerDict[id].Name;
+        int currentOrder = 0;
+        Customer customer = customerDict[id];
+        if (customer.CurrentOrder != null)
+        {
+            currentOrder = 1;
+        }
+        Console.WriteLine($"{customer.Name} has made {customer.OrderHistory.Count + currentOrder} " +
+            $"order(s).");
         foreach (Order order in orderDict.Values)
         {
             if (order.MemberId == id)
@@ -373,7 +388,7 @@ void DisplayCustomerOrders()
         }
         if (!haveOrder)
         {
-            throw new ArgumentException($"No orders have been made by {name}.");
+            throw new ArgumentException($"No orders have been made by {customer}.");
         }
     }
     catch (ArgumentException ex) 
@@ -478,27 +493,44 @@ void ModifyOrderDetails()
     {
         Console.WriteLine(ex.Message);
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine("An unexpected error occurred while modifying order.");
+    }
 }
 
 //Option 7 Process an order and checkout
 void ProcessNCheckOut()
 {
-    if (goldOrderQueue == null && orderQueue == null)
+    try
     {
-        throw new ArgumentException("No orders have been made.");
+        if (goldOrderQueue == null && orderQueue == null)
+        {
+            throw new ArgumentException("No orders have been made.");
+        }
+        // Check if there are gold orders in the queue
+        if (goldOrderQueue.Count > 0)
+        {
+            Order goldOrder = goldOrderQueue.Dequeue();
+            Console.Write($"The order being checked out is {goldOrder.Id}");
+            DisplayOrder(goldOrder);
+            ProcessOrder(goldOrder);
+        }
+        else if (orderQueue.Count > 0)
+        {
+            Order normalOrder = orderQueue.Dequeue();
+            Console.Write($"The order being checked out is {normalOrder.Id}");
+            DisplayOrder(normalOrder);
+            ProcessOrder(normalOrder);
+        }
     }
-    // Check if there are gold orders in the queue
-    if (goldOrderQueue.Count > 0)
+    catch (ArgumentException ex)
     {
-        Order goldOrder = goldOrderQueue.Dequeue();
-        DisplayOrder(goldOrder);
-        ProcessOrder(goldOrder);
+        Console.WriteLine(ex.Message);
     }
-    else if (orderQueue.Count > 0)
+    catch (Exception ex)
     {
-        Order normalOrder = orderQueue.Dequeue();
-        DisplayOrder(normalOrder);
-        ProcessOrder(normalOrder);
+        Console.WriteLine("An unexpected error occured during checkout.");
     }
 }
 
@@ -559,53 +591,60 @@ void AppendCustomerToCsvFile(Customer customer)
     return;
 }
 
-void UpdateCustomerCsvFile(Customer customer)
+void UpdateCustomerCsvFile()
 {
     string relativePath = @"..\..\..\customers.csv";
     string filePath = Path.GetFullPath(relativePath, Directory.GetCurrentDirectory());
     File.WriteAllText(filePath, string.Empty);
-
-    string csvLine = $"{customer.Name},{customer.MemberId},{customer.Dob},{customer.Rewards.Tier}," +
+    foreach (Customer customer in customerDict.Values)
+    {
+        string csvLine = $"{customer.Name},{customer.MemberId},{customer.Dob},{customer.Rewards.Tier}," +
         $"{customer.Rewards.Points},{customer.Rewards.PunchCard}";
-    File.AppendAllLines(filePath, new[] { csvLine });
+        File.AppendAllLines(filePath, new[] { csvLine });
+    }
     return;
 }
 
-void UpdateOrderCsvFile(Order order)
+void UpdateOrderCsvFile()
 {
     string relativePath = @"..\..\..\orders.csv";
     string filePath = Path.GetFullPath(relativePath, Directory.GetCurrentDirectory());
-    foreach (IceCream icecream in order.IceCreamList)
+    File.WriteAllText(filePath, string.Empty);
+
+    foreach (Order order in orderDict.Values)
     {
-        string flavoursString = "";
-        string toppingsString = "";
-        for (int i = 0;i < 3; i++)
+        foreach (IceCream icecream in order.IceCreamList)
         {
-            try { flavoursString += $"{icecream.Flavours[i].Type},"; }
-            catch { flavoursString += ","; }
+            string flavoursString = "";
+            string toppingsString = "";
+            for (int i = 0; i < 3; i++)
+            {
+                try { flavoursString += $"{icecream.Flavours[i].Type},"; }
+                catch { flavoursString += ","; }
+            }
+            for (int i = 0; i < 4; i++)
+            {
+                try { toppingsString += $"{icecream.Toppings[i].Type},"; }
+                catch { toppingsString += ","; }
+
+            }
+            string dipped = "";
+            string waffleFlavour = "";
+            if (icecream.Option == "Cone")
+            {
+                Cone cone = (Cone)icecream;
+                dipped = cone.Dipped.ToString().ToUpper();
+            }
+            if (icecream.Option == "Waffle")
+            {
+                Waffle waffle = (Waffle)icecream;
+                waffleFlavour = waffle.WaffleFlavour;
+            }
+            string csvLine = $"{order.Id},{order.MemberId},{order.TimeReceived.ToString("dd/MM/yyyy HH:mm")}," +
+                $"{order.TimeFulfilled},{icecream.Option},{icecream.Scoop},{dipped},{waffleFlavour}," +
+                $"{flavoursString.Trim(',')},{toppingsString.Trim(',')}";
+            File.AppendAllLines(filePath, new[] { csvLine });
         }
-        for (int i = 0; i < 4; i++)
-        {
-            try { toppingsString += $"{icecream.Toppings[i].Type},"; }
-            catch { toppingsString += ","; }
-            
-        }
-        string dipped = "";
-        string waffleFlavour = "";
-        if (icecream.Option == "Cone")
-        {
-            Cone cone = (Cone)icecream;
-            dipped = cone.Dipped.ToString().ToUpper();
-        }
-        if (icecream.Option == "Waffle")
-        {
-            Waffle waffle = (Waffle)icecream;
-            waffleFlavour = waffle.WaffleFlavour;
-        }
-        string csvLine = $"{order.Id},{order.MemberId},{order.TimeReceived.ToString("dd/MM/yyyy HH:mm")}," +
-            $"{order.TimeFulfilled},{icecream.Option},{icecream.Scoop},{dipped},{waffleFlavour}," +
-            $"{flavoursString.Trim(',')},{toppingsString.Trim(',')}";
-        File.AppendAllLines(filePath, new[] { csvLine });
     }
     return;
 }
@@ -808,35 +847,44 @@ void ProcessOrder(Order order)
 {
     double totalPrice = order.CalculateTotal();
     Customer customer = customerDict[order.MemberId];
-    string membershipStatus = customer.Rewards.Tier;
-    Console.WriteLine($"Membership status: {membershipStatus}");
     string membershipPoint = Convert.ToString(customer.Rewards.Points);
-    Console.WriteLine($"Membership points: {membershipPoint}");
+
+    Console.WriteLine($"{customer.Name}'s current membership status: {customer.Rewards.Tier}");
+    Console.WriteLine($"{customer.Name}'s current membership points: {membershipPoint}\n");
     if (customer.IsBirthday())
     {
         // Calculate the final bill while having the most expensive ice cream cost $0.00
         IceCream mostExpensiveIceCream = order.IceCreamList.OrderByDescending(icecream => 
         icecream.CalculatePrice()).First();
         totalPrice -= mostExpensiveIceCream.CalculatePrice();
-        Console.WriteLine($"It's the customer's birthday! The most expensive ice cream is free.");
+        Console.WriteLine($"It's the customer's birthday! The most expensive icecream is free of charge!");
     }
-    if (customer.Rewards.PunchCard >= 10)
+    if (customer.Rewards.PunchCard >= 10 || !customer.IsBirthday())
     {
         // Set the cost of the first ice cream to $0.00
-        if (order.IceCreamList.Count > 0)
-        {
-            IceCream firstIceCream = order.IceCreamList[0];
-            totalPrice -= firstIceCream.CalculatePrice();
+        IceCream punchedIceCream = order.IceCreamList[0];
+        totalPrice -= punchedIceCream.CalculatePrice();
+        Console.WriteLine("Since customer's punch-card reached 10, first icecream is free!");
 
-            // Reset the punch card back to 0
-            customer.Rewards.PunchCard = 0;
-        }
+        // Reset the punch card back to 0
+        customer.Rewards.PunchCard = 0;
     }
     else
     {
-        customer.Rewards.PunchCard += order.IceCreamList.Count;
-    }
+        foreach (IceCream icecream in order.IceCreamList)
+        {
+            customer.Rewards.Punch();
+        }
 
+        // Ensure that the punch card is not over 10 and to remind that next order's icecream is free
+        if (customer.Rewards.Points >= 10)
+        {
+            customer.Rewards.Points = 10;
+            Console.WriteLine("Customer will receive a free icecream next order.");
+        }
+        Console.WriteLine($"The punch-card has been updated to {customer.Rewards.Points}");
+    }
+    Console.WriteLine();
     if (IsSilverOrGoldMember(customer) && customer.Rewards.Points > 0)
     {
         Console.Write("How many points would you like to redeem? ");
@@ -847,12 +895,13 @@ void ProcessOrder(Order order)
         {
             // Calculate the discount based on the redeemed points
             double discount = redeemPoints * 0.02;
+            customer.Rewards.RedeemPoints(redeemPoints);
 
             // Adjust the total bill by subtracting the discount
             totalPrice -= discount;
 
             // Display information about redeemed points
-            Console.WriteLine($"You redeemed {redeemPoints} points, saving ${discount:0.00}.");
+            Console.WriteLine($"{redeemPoints} points have been redeemed, saving ${discount:0.00}.");
         }
         else
         {
@@ -862,13 +911,17 @@ void ProcessOrder(Order order)
     // Display the final bill amount
     Console.WriteLine($"Your final bill amount is ${totalPrice:0.00}");
     // Prompt user to press any key to make payment
-    Console.WriteLine("Press any key to make payment...");
+    Console.Write("Press any key to make payment...");
     Console.ReadKey();
+
+    // Setting the time fulfilled to indicate order completion
+    order.TimeFulfilled = DateTime.Now;
+
     // Calculate points based on the total amount paid
-    int earnedPoints = (int)Math.Floor(totalPrice * 0.72);
+    int earnedPoints = Convert.ToInt32(Math.Floor(totalPrice * 0.72));
 
     // Increment customer's points
-    customer.Rewards.Points += earnedPoints;
+    customer.Rewards.AddPoints(earnedPoints);
 
     Console.WriteLine($"Earned Points: ");
 
@@ -876,7 +929,7 @@ void ProcessOrder(Order order)
     if (customer.Rewards.Points >= 100 && customer.Rewards.Tier == "Gold")
     {
         // Customer is already a Gold member
-        Console.WriteLine("Congratulations! You are already a Gold member.");
+        Console.WriteLine("You are already a Gold member! Thank you for your continuous support!");
     }
     else if (customer.Rewards.Points >= 100)
     {
@@ -895,7 +948,8 @@ void ProcessOrder(Order order)
         customer.Rewards.Tier = "Silver";
         Console.WriteLine("Congratulations! You are now a Silver member.");
     }
-    //Console.WriteLine($"Time Fulfilled: {order.timeFulfilled.ToString("dd/MM/yyyy HH:mm")}");
+    UpdateCustomerCsvFile();
+    UpdateOrderCsvFile();
 }
 
 string CapitaliseStr(string str)
