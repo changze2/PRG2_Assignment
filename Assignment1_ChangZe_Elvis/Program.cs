@@ -6,8 +6,8 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using static System.Formats.Asn1.AsnWriter;
-
-Dictionary<int, Customer> customerDict = new Dictionary<int, Customer>();
+//This is all collection classes to be created
+Dictionary<int, Customer> customerDict = new Dictionary<int, Customer>(); 
 Dictionary<int, Order> orderDict = new Dictionary<int, Order>();
 Queue <Order> goldOrderQueue = new Queue<Order>();
 Queue <Order> orderQueue = new Queue<Order>();
@@ -16,9 +16,10 @@ List<string> toppingOptions = new List<string> { "sprinkles", "mochi", "sago", "
 List<string> flavourOptions = new List<string> { "vanilla", "chocolate", "strawberry", "durian", "ube", "sea salt" };
 List<string> waffleOptions = new List<string> { "original", "red velvet", "charcoal", "pandan" };
 
+//Initialize the customer and order file method
 InitCustomers();
 InitOrders();
-
+//Our unique Otto Symbol
 Console.WriteLine(
     " _____ _____ _______             _" +
     "\n|_   _/ ____|__   __|           | |" +
@@ -27,19 +28,20 @@ Console.WriteLine(
     "\n _| || |____   | | | |  __/ (_| | |_\\__ \\" +
     "\n|_____\\_____|  |_|_|  \\___|\\__,_|\\__|___/" +
     "\n\nHi I'm Otto, your Friendly Neighbourhood Robot Scooper! Take a look at our options below!");
+//This is where we run a while loop for our program
 while (true)
 {
-    Menu();
+    Menu(); //Menu Method called
     try
     {
         Console.Write("Enter option: ");
         int option = Convert.ToInt16(Console.ReadLine().Trim());
 
-        if (option < 0 || option > 8)
+        if (option < 0 || option > 8) //ArgumentException will be triggered if it didn meet the requirement
         {
             throw new ArgumentException();
         }
-        if (option == 0)
+        if (option == 0) 
         {
             Console.WriteLine("Program ended.");
             break;
@@ -89,6 +91,7 @@ while (true)
     }
 }
 
+//This method is to read the customers.csv and store the values in customerDict
 void InitCustomers()
 {
     using (StreamReader sr = new StreamReader("customers.csv"))
@@ -109,6 +112,7 @@ void InitCustomers()
     }
 }
 
+//This method is to read the orders.csv and store the values in orderDict
 void InitOrders()
 {
     using (StreamReader sr = new StreamReader("orders.csv"))
@@ -171,6 +175,7 @@ void InitOrders()
     }
 }
 
+//This is a menu method
 void Menu()
 {
     Console.WriteLine(
@@ -543,6 +548,9 @@ void DisplayMonthlyAndYearAmount()
         if (int.TryParse(Console.ReadLine(), out int promptyear))
         {
             double totalAmount = 0;
+            Console.WriteLine("======================================");
+            Console.WriteLine("|   Year   |   Month   |   Amount    |");
+            Console.WriteLine("======================================");
 
             for (int month = 1; month <= 12; month++)
             {
@@ -559,13 +567,14 @@ void DisplayMonthlyAndYearAmount()
                     }
                 }
 
-                string monthName = new DateTime(promptyear, month, 1).ToString("MMM yyyy");
-                Console.WriteLine($"{monthName}: ${monthlyTotal:F2}");
+                string monthName = new DateTime(promptyear, month, 1).ToString("MMM");
+                Console.WriteLine($"|   {promptyear,-4}   |   {monthName,-5}   |   ${monthlyTotal,-6:F2}   |");
 
                 totalAmount += monthlyTotal;
             }
-
+            Console.WriteLine("--------------------------------------");
             Console.WriteLine($"Total Charged Amount for {promptyear}: ${totalAmount:F2}");
+            Console.WriteLine("--------------------------------------");
         }
         else
         {
@@ -575,7 +584,6 @@ void DisplayMonthlyAndYearAmount()
     catch (Exception ex)
     {
         Console.WriteLine($"An error occurred: {ex.Message}");
-        // You might want to log the exception or handle it in a way appropriate for your application.
     }
 }
 
@@ -649,6 +657,7 @@ void UpdateOrderCsvFile()
     return;
 }
 
+//New Method to check whether it is premium or normal flavour
 Flavour FlavourPremiumCheck(string flavourOrg)
 {
     string flavour = flavourOrg.ToLower();
@@ -663,6 +672,7 @@ Flavour FlavourPremiumCheck(string flavourOrg)
     return null;
 }
 
+//Method to display all the flavours
 void DisplayFlavours()
 {
     Console.WriteLine(
@@ -681,6 +691,7 @@ void DisplayFlavours()
     return;
 }
 
+//Method to display all the toppings
 void DisplayToppings()
 {
     Console.WriteLine(
@@ -694,6 +705,7 @@ void DisplayToppings()
     return;
 }
 
+//Method to display all the waffle flavours
 void DisplayWaffleFlavours()
 {
     Console.WriteLine(
@@ -712,6 +724,7 @@ void DisplayWaffleFlavours()
     return;
 }
 
+//Method to display all details of order
 void DisplayOrder(Order order)
 {
     Console.WriteLine("\n------------------------------------------------------------");
@@ -731,6 +744,7 @@ void DisplayOrder(Order order)
     Console.WriteLine("------------------------------------------------------------");
 }
 
+//Method to enqueue order for gold or normal tier customer's order
 void OrderQueue(Customer customer, Order order)
 {
     if (customer.Rewards.Tier == "Gold")
@@ -742,6 +756,7 @@ void OrderQueue(Customer customer, Order order)
     return;
 }
 
+//Method to create ice cream
 IceCream CreateIceCream()
 {
     IceCream icecream = null;
@@ -843,6 +858,7 @@ IceCream CreateIceCream()
     return icecream;
 }
 
+//Method to process an order
 void ProcessOrder(Order order)
 {
     double totalPrice = order.CalculateTotal();
@@ -952,12 +968,14 @@ void ProcessOrder(Order order)
     UpdateOrderCsvFile();
 }
 
+//Capitalise the string
 string CapitaliseStr(string str)
 {
     string str1 = char.ToUpper(str[0]) + str.Substring(1);
     return str1;
 }
 
+//Boolean to check if the customer is silver or gold
 bool IsSilverOrGoldMember(Customer customer)
 {
     // Check if the customer is silver or gold
