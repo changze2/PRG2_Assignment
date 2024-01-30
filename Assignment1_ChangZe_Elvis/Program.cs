@@ -74,7 +74,7 @@ while (true)
                 ProcessNCheckOut();
                 break;
             case 8:
-                DisplayMonthlyAndYearAmount(customerDict, orderDict);
+                DisplayMonthlyAndYearAmount();
                 break;
         }
         Console.WriteLine();
@@ -174,9 +174,9 @@ void InitOrders()
 void Menu()
 {
     Console.WriteLine(
-        "==============================" +
-        "\n            Menu" +
-        "\n==============================" +
+        "====================================" +
+        "\n               Menu" +
+        "\n====================================" +
         "\n[1] List all customers" +
         "\n[2] List all orders" +
         "\n[3] Register new customer" +
@@ -184,22 +184,23 @@ void Menu()
         "\n[5] Display order details" +
         "\n[6] Modify order" +
         "\n[7] Checkout order" +
+        "\n[8] Display monthly charge per year" +
         "\n[0] Exit program" +
-        "\n------------------------------");
+        "\n------------------------------------");
 }
 
 //Option 1 - List all customers
 void DisplayCustomerInfo()
 {
     Console.WriteLine("================================================================================" +
-        "\n                                   Customers" +
+        $"\n|{"Customers",39}{" ",39}|" +
         "\n================================================================================" +
-        $"\n{"Name",-13} | {"ID",-8} | {"DOB",-11} | {"Tier",-10} | {"Points",-6} | {"Punch Card",-5}" +
+        $"\n|{"Name",-13} | {"ID",-8} | {"DOB",-11} | {"Tier",-10} | {"Points",-6} | {"Punch Card",-15}|" +
         "\n--------------------------------------------------------------------------------");
     foreach (Customer customer in customerDict.Values)
     {
-        Console.WriteLine($"{customer.Name,-13} | {customer.MemberId,-8} | {customer.Dob,-11} | {customer.Rewards.Tier,-10} | " +
-            $"{customer.Rewards.Points,-6} | {customer.Rewards.PunchCard,-5}");
+        Console.WriteLine($"|{customer.Name,-13} | {customer.MemberId,-8} | {customer.Dob,-11} | {customer.Rewards.Tier,-10} | " +
+            $"{customer.Rewards.Points,-6} | {customer.Rewards.PunchCard,-15}|");
     }
     Console.WriteLine("--------------------------------------------------------------------------------");
 }
@@ -286,7 +287,7 @@ void RegisterCustomer()
         newCustomer.Rewards = newPointCard;
         Console.WriteLine("Registration Successful!");
         customerDict.Add(id, newCustomer);
-        UpdateCustomerCsvFile(newCustomer);
+        AppendCustomerToCsvFile(newCustomer);
     }
     catch (ArgumentException ex)
     {
@@ -502,7 +503,7 @@ void ProcessNCheckOut()
 }
 
 //Option 8 Display monthly charged amounts breakdown & total charged amounts for the year
-void DisplayMonthlyAndYearAmount(Dictionary<int, Customer> customerDict, Dictionary<int, Order> orderDict)
+void DisplayMonthlyAndYearAmount()
 {
     Console.Write("Enter the year: ");
     int promptyear = Convert.ToInt32(Console.ReadLine());
@@ -537,7 +538,7 @@ void DisplayMonthlyAndYearAmount(Dictionary<int, Customer> customerDict, Diction
 }
 
 //New method for appending customer information into csv file
-void UpdateCustomerCsvFile(Customer customer)
+void AppendCustomerToCsvFile(Customer customer)
 {
     string relativePath = @"..\..\..\customers.csv";
     string filePath = Path.GetFullPath(relativePath, Directory.GetCurrentDirectory());
@@ -547,7 +548,18 @@ void UpdateCustomerCsvFile(Customer customer)
     return;
 }
 
-//New method for appending customer information into csv file
+void UpdateCustomerCsvFile(Customer customer)
+{
+    string relativePath = @"..\..\..\customers.csv";
+    string filePath = Path.GetFullPath(relativePath, Directory.GetCurrentDirectory());
+    File.WriteAllText(filePath, string.Empty);
+
+    string csvLine = $"{customer.Name},{customer.MemberId},{customer.Dob},{customer.Rewards.Tier}," +
+        $"{customer.Rewards.Points},{customer.Rewards.PunchCard}";
+    File.AppendAllLines(filePath, new[] { csvLine });
+    return;
+}
+
 void UpdateOrderCsvFile(Order order)
 {
     string relativePath = @"..\..\..\orders.csv";
