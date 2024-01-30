@@ -118,7 +118,7 @@ void InitCustomers()
             int id = Convert.ToInt32(line[1]);
 
             // Reasoning for using string for dob is in Customer class implementation
-            DateOnly dob = DateOnly.FromDateTime(DateTime.Parse(line[2]));
+            string dob = line[2];
             Customer customer = new Customer(name, id, dob);
             customer.Rewards = new PointCard(Convert.ToInt32(line[4]), Convert.ToInt16(line[5]));
             customer.Rewards.Tier = line[3];
@@ -368,22 +368,18 @@ void RegisterCustomer()
 
         // Similar to TryParse, we used TryParseExact to ensure that the string entered follows
         // the exact format of dd-mm-yyyy, however we used d-M-yyyy as it also allows inputs where
-        // the day and month can be entered as single digits. 
-        // The CultureInfo is to ensure that the timezone is the same regardless of which devices 
-        // are running the program as some devices may be running on American time which is in the
-        // MM/dd/yyyy format, while UK uses dd/MM/yyyy which is what is used in this program
-        if (!DateTime.TryParseExact(dobString, "d-M-yyyy", CultureInfo.GetCultureInfo("en-GB"), 
-            DateTimeStyles.None, out DateTime dobDT))
+        // the day and month can be entered as single digits.
+        // CultureInfo.InvariantCulture and DateTimeStyles.None is used to the format is not affected by the
+        // user's computer settings. DateTimeStyles is used to set the timezone, there it is best to put as None
+        if (!DateTime.TryParseExact(dobString, "d-M-yyyy", CultureInfo.InvariantCulture, 
+            DateTimeStyles.None, out DateTime dob))
         {
             throw new ArgumentException("Invalid date of birth format. Please use DD-MM-YYYY.");
         }
 
-        // Converting the DateTime to DateOnly, since time is not needed for DOB
-        DateOnly dob = DateOnly.FromDateTime(dobDT);
-
         // Creating the Customer object as well as the Rewards object since its associated
         // to Customer
-        Customer newCustomer = new Customer(name, id, dob);
+        Customer newCustomer = new Customer(name, id, dob.ToString());
 
         // All new customers start with 0 points and 0 punch-card with Ordinary tier
         PointCard newPointCard = new PointCard(0, 0);

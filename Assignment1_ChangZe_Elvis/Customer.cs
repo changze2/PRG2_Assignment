@@ -20,11 +20,17 @@ namespace Assignment1_ChangZe_Elvis
         public PointCard Rewards { get; set; }
 
         public Customer() { }
-        public Customer(string name, int memberId, DateOnly dob)
+        public Customer(string name, int memberId, string dob)
         {
             Name = name;
             MemberId = memberId;
-            Dob = dob;
+
+            // The CultureInfo is to ensure that the timezone is the same regardless of which devices 
+            // are running the program as some devices may be running on American time which is in the
+            // MM/dd/yyyy format, while UK uses dd/MM/yyyy which is what is used in this program
+            CultureInfo newCulture = new CultureInfo("en-GB");
+            Thread.CurrentThread.CurrentCulture = newCulture;
+            Dob = DateOnly.FromDateTime(DateTime.Parse(dob));
         }
 
         public void MakeOrder()
