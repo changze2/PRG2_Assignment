@@ -41,6 +41,7 @@ namespace Assignment1_ChangZe_Elvis
 
         public bool IsBirthday()
         {
+            // Gets the current date time and returns a bool if it matches
             DateTime dateTime = DateTime.Now;
             int userBirthDate = Dob.Day;
             int userBirthMonth = Dob.Month;

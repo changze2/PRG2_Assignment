@@ -1,6 +1,4 @@
 ﻿// See https://aka.ms/new-console-template for more information
-
-
 using Assignment1_ChangZe_Elvis;
 using Microsoft.VisualBasic.FileIO;
 using System;
@@ -15,6 +13,8 @@ Dictionary<int, Customer> customerDict = new Dictionary<int, Customer>();
 Dictionary<int, Order> orderDict = new Dictionary<int, Order>();
 Queue <Order> goldOrderQueue = new Queue<Order>();
 Queue <Order> orderQueue = new Queue<Order>();
+
+// We made lists of all the options so that we can validate the inputs later on
 List<string> icecreamOptions = new List<string> { "cup", "cone", "waffle" };
 List<string> toppingOptions = new List<string> { "sprinkles", "mochi", "sago", "oreos" };
 List<string> flavourOptions = new List<string> { "vanilla", "chocolate", "strawberry", "durian", "ube", "sea salt" };

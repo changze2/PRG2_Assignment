@@ -18,7 +18,10 @@ namespace Assignment1_ChangZe_Elvis
         }
         public override double CalculatePrice()
         {
+            // Created a variable to store the number of premium flavours
             int premiumFlavours = 0;
+
+            // We used a foreach loop to calculate the price for every flavour and topping
             foreach (Flavour flavour in Flavours)
             {
                 if (flavour.Premium)
