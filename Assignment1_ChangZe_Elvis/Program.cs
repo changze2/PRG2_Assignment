@@ -328,26 +328,27 @@ void RegisterCustomer()
     try
     {
         Console.Write("Enter your name: ");
-        string name = Console.ReadLine().Trim(); // using .Trim() to remove any trailing whitespaces
+        // using .Trim() to remove any trailing whitespaces and lower to standardise all names
+        string name = Console.ReadLine().Trim().ToLower(); 
 
         // This block of code will trigger if the name is null or whitespace
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new ArgumentException("Name cannot be empty or whitespace.");
+            throw new ArgumentException("\nName cannot be empty or whitespace.");
         }
 
         // This block of code will trigger if the name is not made of all alphabets
         // the .All(char.IsLetter) function returns a bool if it follows the conditions
         // inside the .All() function
-        else if (!name.All(char.IsLetter))
+        else if (!name.All(c => char.IsLetter(c) || c == ' '))
         {
-            throw new ArgumentException("Name can only contain alphabets.");
+            throw new ArgumentException("\nName can only contain alphabets.");
         }
 
         // This is to ensure that the outputs are properly formatted.
         else if (name.Length > 13)
         {
-            throw new ArgumentException("Sorry, please enter a shorter name.");
+            throw new ArgumentException("\nSorry, please enter a shorter name.");
         }
 
         Console.Write("Enter customer id number (e.g 123456): ");
@@ -357,13 +358,13 @@ void RegisterCustomer()
         // digit number. It would also reject inputs where starting digit is 0.
         if (!int.TryParse(Console.ReadLine(), out int id) || id <= 0 || id.ToString().Length != 6 )
         {
-            throw new ArgumentException("Invalid customer ID. Please follow the examples (e.g 123456).");
+            throw new ArgumentException("\nInvalid customer ID. Please follow the format (e.g 123456).");
         }
 
         // This to check if the id is already taken by another customer, which prevents duplicates
         else if (customerDict.ContainsKey(id))
         {
-            throw new ArgumentException($"Sorry, {id} has already been registered to another customer.");
+            throw new ArgumentException($"\nSorry, {id} has already been registered to another customer.");
         }
 
         Console.Write("Enter date of birth (DD-MM-YYYY): ");
@@ -377,12 +378,18 @@ void RegisterCustomer()
         if (!DateTime.TryParseExact(dobString, "d-M-yyyy", CultureInfo.InvariantCulture, 
             DateTimeStyles.None, out DateTime dob))
         {
-            throw new ArgumentException("Invalid date of birth format. Please use DD-MM-YYYY.");
+            throw new ArgumentException("\nInvalid date of birth format. Please use DD-MM-YYYY.");
+        }
+
+        // Funny little output if dob entered exceeds current date
+        if (dob > DateTime.Now)
+        {
+            throw new ArgumentException("\nWow, are you born in the future?");
         }
 
         // Creating the Customer object as well as the Rewards object since its associated
         // to Customer
-        Customer newCustomer = new Customer(name, id, dob.ToString());
+        Customer newCustomer = new Customer(CapitaliseStr(name), id, dob.ToString());
 
         // All new customers start with 0 points and 0 punch-card with Ordinary tier
         PointCard newPointCard = new PointCard(0, 0);
@@ -398,6 +405,7 @@ void RegisterCustomer()
     catch (ArgumentException ex)
     {
         Console.WriteLine(ex.Message);
+        Console.WriteLine("Registration failed!");
     }
     catch (Exception)
     {
@@ -418,7 +426,7 @@ void CreateCustomerOrder()
         // registered customer
         if (!int.TryParse(Console.ReadLine(), out int id) || !customerDict.ContainsKey(id))
         {
-            throw new ArgumentException("Please enter a valid customer id.");
+            throw new ArgumentException("\nPlease enter a valid customer id.");
         }
         Customer customer = customerDict[id];
 
@@ -426,7 +434,7 @@ void CreateCustomerOrder()
         // one first
         if (customer.CurrentOrder !=  null)
         {
-            throw new ArgumentException("Please checkout before ordering again.");
+            throw new ArgumentException("\nPlease checkout before ordering again.");
         }
         // This is to ensure that all order ids will be unique since orderDict contains all the orders, past 
         // and present
@@ -445,7 +453,7 @@ void CreateCustomerOrder()
             string repeat = Console.ReadLine().Trim().ToLower();
             if (repeat != "y" && repeat != "n")
             {
-                throw new ArgumentException("Please enter Y or N.");
+                throw new ArgumentException("\nPlease enter Y or N.");
             }
             if (repeat == "n")
             {
@@ -469,6 +477,7 @@ void CreateCustomerOrder()
     catch (ArgumentException ex)
     {
         Console.WriteLine(ex.Message);
+        Console.WriteLine("Order creation failed.");
     }
     catch (Exception ex)
     {
@@ -504,6 +513,13 @@ void DisplayCustomerOrders()
         {
             currentOrder = 1;
         }
+
+        // Checking if customer has made any order
+        if (customer.OrderHistory.Count + currentOrder == 0)
+        {
+            throw new ArgumentException($"\nNo orders have been made by {customer.Name}.");
+        }
+
         Console.WriteLine($"\n{customer.Name} has made {customer.OrderHistory.Count + currentOrder} " +
             $"order(s).");
         foreach (Order order in orderDict.Values)
@@ -514,11 +530,6 @@ void DisplayCustomerOrders()
                 haveOrder = true;
                 DisplayOrder(order);
             }
-        }
-        // If haveOrder is false, it means customer has not made any orders, so output message is printed
-        if (!haveOrder)
-        {
-            throw new ArgumentException($"No orders have been made by {customer.Name}.");
         }
     }
     catch (ArgumentException ex) 
@@ -544,14 +555,14 @@ void ModifyOrderDetails()
         // registered customer
         if (!int.TryParse(Console.ReadLine(), out int id) || !customerDict.ContainsKey(id))
         {
-            throw new ArgumentException("Please enter a valid customer id.");
+            throw new ArgumentException("\nPlease enter a valid customer id.");
         }
         Customer selectedCustomer = customerDict[id];
 
         // If user has not made any order, then this method stops
         if (selectedCustomer.CurrentOrder == null)
         {
-            throw new ArgumentException($"No orders made by {selectedCustomer.Name}.");
+            throw new ArgumentException($"\nNo orders have been made by {selectedCustomer.Name}.");
         }
         Order order = selectedCustomer.CurrentOrder;
         Console.Write("\nYour current order is:");
@@ -672,40 +683,220 @@ void ModifyOrderDetails()
 // Option 7 Process an order and checkout
 void ProcessNCheckOut()
 {
+    // Creating backups in case an error occurs during the method runtime
+    // This is to prevent the previous data from being lost
+    Queue<Order> orderQueueCopy = new(orderQueue);
+    Queue<Order> goldOrderQueueCopy = new(goldOrderQueue);
     // Using a try catch block to catch any errors that may occur from user input
     try
     {
         // This is to check if both queue collection classes are null, and if so, the method will end here
-        if (goldOrderQueue == null && orderQueue == null)
+        if (goldOrderQueue.Count == 0 && orderQueue.Count == 0)
         {
-            throw new ArgumentException("No orders have been made.");
+            throw new NotImplementedException("No orders have been made.");
         }
 
+        // Creating the order object first
+        Order order = null;
         // Checking if there are gold orders in the queue first to be checked out
         if (goldOrderQueue.Count > 0)
         {
             // Dequeuing the object from the queue and then running the ProcessOrder method we created
-            Order goldOrder = goldOrderQueue.Dequeue();
-            Console.Write($"The order being checked out:");
-            DisplayOrder(goldOrder);
-            ProcessOrder(goldOrder);
+            order = goldOrderQueue.Dequeue();
         }
         else if (orderQueue.Count > 0)
         {
             // Same process as the goldOrderQueue
-            Order normalOrder = orderQueue.Dequeue();
-            Console.Write($"The order being checked out:");
-            DisplayOrder(normalOrder);
-            ProcessOrder(normalOrder);
+            order = orderQueue.Dequeue();
         }
+
+        Console.Write($"The order being checked out:");
+        DisplayOrder(order);
+
+        // Creating the variables to be used later on
+        Customer customer = customerDict[order.MemberId];
+
+        // Creating a copy of the punchcard in the case of an error during method runtime. 
+        // This is to prevent the previous data from being lost
+        int punchCardCopy = customer.Rewards.PunchCard;
+        double totalPrice = order.CalculateTotal();
+
+        Console.WriteLine($"{customer.Name}'s current membership status: {customer.Rewards.Tier}");
+        Console.WriteLine($"{customer.Name}'s current membership points: {customer.Rewards.Points}");
+
+        // Using customer class method to check if it is the customer's birthday
+        if (customer.IsBirthday())
+        {
+            Console.WriteLine();
+            // This is to check if the birthday promotion was already redeemed
+            bool check = customer.OrderHistory.Any(order => order.TimeReceived.Date == DateTime.Now.Date);
+            if (check)
+            {
+                Console.WriteLine("The customer has already redeemed the free birthday ice cream");
+            }
+            else
+            {
+                // Calculate the final bill while having the most expensive ice cream cost $0.00
+                IceCream mostExpensiveIceCream = order.IceCreamList.OrderByDescending(icecream =>
+                icecream.CalculatePrice()).First();
+                totalPrice -= mostExpensiveIceCream.CalculatePrice();
+                Console.WriteLine($"It's the customer's birthday! The most expensive icecream is free of charge!");
+            }
+        }
+
+        // Checking if the birthday promotion has already been redeemed. If it has been redeemed, punch card
+        // will remain the same
+        if (customer.Rewards.PunchCard >= 10 && !customer.IsBirthday())
+        {
+            // Set the cost of the first ice cream to $0.00
+            IceCream punchedIceCream = order.IceCreamList[0];
+            totalPrice -= punchedIceCream.CalculatePrice();
+            Console.WriteLine("\nSince customer's punch-card reached 10, first icecream is free!");
+
+            // Reset the punch card back to 0
+            customer.Rewards.PunchCard = 0;
+        }
+
+        // if punchcard promotion is unavailable, then just add a punch for every ice cream
+        else
+        {
+            foreach (IceCream icecream in order.IceCreamList)
+            {
+                customer.Rewards.Punch();
+            }
+
+            // Ensure that the punch card is not over 10 and to remind that next order's icecream is free
+            if (customer.Rewards.PunchCard >= 10)
+            {
+                customer.Rewards.PunchCard = 10;
+                Console.WriteLine("\nCustomer will receive a free icecream next order.");
+            }
+        }
+
+        // Created an external variable to store the amount of points redeemed to check
+        // whether customer was eligible for promotion before redemption of points
+        int redeemedPoints = 0;
+        // Using a method to check if customer tier is silver or gold to redeem points
+        if (IsSilverOrGoldMember(customer) && customer.Rewards.Points > 0)
+        {
+            double discount = 0;
+            while (true)
+            {
+                Console.Write($"\nAvailable points: {customer.Rewards.Points}" +
+                "\nHow many points would you like to redeem? ");
+                if (!int.TryParse(Console.ReadLine(), out int redeemPoints) || redeemPoints < 0)
+                {
+                    customer.Rewards.PunchCard = punchCardCopy;
+                    throw new ArgumentException("\nPlease enter a valid number of points.");
+                }
+
+                // Checking if the customer has enough points to redeem
+                else if (redeemPoints > customer.Rewards.Points)
+                {
+                    customer.Rewards.PunchCard = punchCardCopy;
+                    throw new ArgumentException("\nThere is not enough points to redeem.");
+                }
+                // Calculate the discount based on the redeemed points and subtract it from the customer object
+                discount = redeemPoints * 0.02;
+                redeemedPoints = redeemPoints;
+
+                // Checking if the redeemed points exceed the order bill and if it does, prompt user 
+                // for decision
+                if (discount > totalPrice)
+                {
+                    redeemedPoints = Convert.ToInt32(Math.Ceiling(totalPrice / 0.02));
+                    discount = totalPrice;
+                    Console.Write("\nYour points redemption has exceeded the order bill." +
+                        $"\nIf you proceed, only {redeemedPoints} will be deducted. If not, you can re-enter." +
+                        "\nWould you like to proceed? [Y/N]: ");
+                    string proceed = Console.ReadLine().Trim().ToLower();
+                    if (proceed != "y" && proceed != "n")
+                    {
+                        Console.WriteLine("\nPlease enter a valid option.");
+                    }
+                    else if (proceed == "y") { break; }
+                    continue;
+                }
+                else { break; }
+            }
+
+            customer.Rewards.RedeemPoints(redeemedPoints);
+
+            // Adjust the total bill by subtracting the discount
+            totalPrice -= discount;
+
+            // Display information about redeemed points
+            Console.WriteLine($"{redeemedPoints} points have been redeemed, saving ${discount:0.00}.");
+        }
+
+        // Display the final bill amount
+        Console.WriteLine($"\nFinal bill amount: ${totalPrice:0.00}\n");
+
+        // Prompt user to press any key to make payment
+        Console.Write("Press any key to make payment...");
+        Console.ReadKey();
+
+        // Setting the time fulfilled to indicate order completion
+        order.TimeFulfilled = DateTime.Now;
+
+        // Calculate points based on the total amount paid
+        int earnedPoints = Convert.ToInt32(Math.Floor(totalPrice * 0.72));
+
+        // Increment customer's points
+        customer.Rewards.AddPoints(earnedPoints);
+
+        Console.WriteLine($"\n\nUpdated Points: {customer.Rewards.Points - earnedPoints} + {earnedPoints}");
+        Console.WriteLine($"Updated Punch-Card: {customer.Rewards.PunchCard - order.IceCreamList.Count} + " +
+            $"{order.IceCreamList.Count}");
+
+        // Check for membership tier promotions
+        if (customer.Rewards.Tier == "Gold")
+        {
+            // Customer is already a Gold member
+            Console.WriteLine("You are already a Gold member! Thank you for your continuous support!");
+        }
+        else if ((customer.Rewards.Points + redeemedPoints) >= 100)
+        {
+            // Promote the customer to Gold member
+            customer.Rewards.Tier = "Gold";
+            Console.WriteLine("Congratulations! You are now a Gold member.");
+        }
+        else
+        {
+            if (customer.Rewards.Tier == "Silver")
+            {
+                // Customer is already a Silver member
+                Console.WriteLine("Congratulations! You are already a Silver member.");
+            }
+            else if ((customer.Rewards.Points + redeemedPoints) >= 50)
+            {
+                // Promote the customer to Silver member
+                customer.Rewards.Tier = "Silver";
+                Console.WriteLine("Congratulations! You are now a Silver member.");
+            }
+        }
+        UpdateCustomerCsvFile();
+        UpdateOrderCsvFile();
+    }
+    catch (NotImplementedException ex)
+    {
+        Console.WriteLine(ex.Message);
     }
     catch (ArgumentException ex)
     {
         Console.WriteLine(ex.Message);
+        Console.WriteLine("Order checkout failed.");
+
+        // Restoring the backup data of the queues
+        goldOrderQueue = goldOrderQueueCopy;
+        orderQueue = orderQueueCopy;
     }
     catch (Exception ex)
     {
         Console.WriteLine("An unexpected error occured during checkout.");
+        // Restoring the backup data of the queues
+        goldOrderQueue = goldOrderQueueCopy;
+        orderQueue = orderQueueCopy;
     }
 }
 
@@ -725,7 +916,7 @@ void DisplayMonthlyAndYearAmount()
         // Fun little error message if user keys a year below 2000
         if (promptyear < 2000)
         {
-            throw new ArgumentException("Haha, our shop is not that old!");
+            throw new ArgumentException("\nHaha, our shop is not that old!");
         }
 
         double totalAmount = 0;
@@ -799,7 +990,7 @@ void UpdateCustomerCsvFile()
 
     // Re-adding the header of the file
     File.AppendAllLines(filePath, new[]
-    { "Name, MemberId, DOB, MembershipStatus, MembershipPoints, PunchCard" });
+    { "Name,MemberId,DOB,MembershipStatus,MembershipPoints,PunchCard" });
 
     foreach (Customer customer in customerDict.Values)
     {
@@ -840,8 +1031,19 @@ void UpdateOrderCsvFile()
             {
                 flavoursString += $"{flavour.Type},";
             }
+            // To ensure that there wont be a trailing comma
+            if (icecream.Flavours.Count == 3)
+            {
+                flavoursString = flavoursString.Trim(',');
+            }
             for (int i = 0; i < (3 - icecream.Flavours.Count); i++)
             {
+                // This is to check if it is the last element in the string and if it is, then it will not add
+                // another comma
+                if (i == (3 - icecream.Flavours.Count - 1))
+                {
+                    break;
+                }
                 flavoursString += ",";
             }
 
@@ -851,6 +1053,11 @@ void UpdateOrderCsvFile()
             {
                 toppingsString += $"{topping.Type},";
             }
+            // To ensure that there wont be a trailing comma
+            if (icecream.Toppings.Count == 4)
+            {
+                toppingsString = toppingsString.Trim(',');
+            }
             for (int i = 0; i < (4 - icecream.Toppings.Count); i++)
             {
                 // This is to check if it is the last element in the string and if it is, then it will not add
@@ -859,7 +1066,7 @@ void UpdateOrderCsvFile()
                 {
                     break;
                 }
-                flavoursString += ",";
+                toppingsString += ",";
             }
 
             // Initialising the dipped and waffleFlavour strings beforehand as not all icecream objects 
@@ -879,8 +1086,11 @@ void UpdateOrderCsvFile()
                 Waffle waffle = (Waffle)icecream;
                 waffleFlavour = waffle.WaffleFlavour;
             }
+            
+            // order.TimeFulfilled?.ToString() is to check if order.TimeFulfilled is null. If it is null,
+            // the .ToString will not run and instead return a null string value which is ""
             string csvLine = $"{order.Id},{order.MemberId},{order.TimeReceived.ToString("dd/MM/yyyy HH:mm")}," +
-                $"{order.TimeFulfilled},{icecream.Option},{icecream.Scoop},{dipped},{waffleFlavour}," +
+                $"{order.TimeFulfilled?.ToString("dd/MM/yyyy HH:mm")},{icecream.Option},{icecream.Scoop},{dipped},{waffleFlavour}," +
                 $"{flavoursString},{toppingsString}";
             File.AppendAllLines(filePath, new[] { csvLine });
         }
@@ -1016,7 +1226,7 @@ IceCream CreateIceCream()
     // initialised at the start
     if (!icecreamOptions.Contains(option))
     {
-        throw new ArgumentException("Please enter a valid icecream option.");
+        throw new ArgumentException("\nPlease enter a valid icecream option.");
     }
 
     // Using if statements to create the proper icecream object
@@ -1030,7 +1240,7 @@ IceCream CreateIceCream()
         // initialised at the start
         if (!waffleOptions.Contains(waffleFlavour))
         {
-            throw new ArgumentException("Please enter a valid waffle flavour.");
+            throw new ArgumentException("\nPlease enter a valid waffle flavour.");
         }
         icecream = new Waffle(CapitaliseStr(option), scoops, flavourList, toppingsList,
             CapitaliseStr(waffleFlavour));
@@ -1042,7 +1252,7 @@ IceCream CreateIceCream()
         string dippedInput = Console.ReadLine().Trim().ToLower();
         if (dippedInput != "y" && dippedInput != "n")
         {
-            throw new ArgumentException("Please enter Y or N.");
+            throw new ArgumentException("\nPlease enter Y or N.");
         }
         bool dipped = false;
         if (dippedInput == "y")
@@ -1062,13 +1272,13 @@ IceCream CreateIceCream()
     // Using TryParse to try to convert user input into an int
     if (!int.TryParse(Console.ReadLine(), out scoops))
     {
-        throw new ArgumentException("Please enter a valid number.");
+        throw new ArgumentException("\nPlease enter a valid number.");
     }
 
     // Checking if the user input is within 1-3
     else if (scoops < 1 || scoops > 3)
     {
-        throw new ArgumentException("Please only enter 1-3 scoops.");
+        throw new ArgumentException("\nPlease only enter 1-3 scoops.");
     }
     icecream.Scoop = scoops;
     Console.WriteLine();
@@ -1084,7 +1294,7 @@ IceCream CreateIceCream()
         // list initialised at the start
         if (!flavourOptions.Contains(flavour))
         {
-            throw new ArgumentException("Please enter a valid flavour.");
+            throw new ArgumentException("\nPlease enter a valid flavour.");
         }
 
         // Adding the flavour object into the flavours list
@@ -1098,11 +1308,11 @@ IceCream CreateIceCream()
     // Same process as the flavours
     if (!int.TryParse(Console.ReadLine(), out int toppingsNumber))
     {
-        throw new ArgumentException("Please enter a valid number.");
+        throw new ArgumentException("\nPlease enter a valid number.");
     }
     else if (toppingsNumber < 0 || toppingsNumber > 4)
     {
-        throw new ArgumentException("Sorry, you can only choose a maximum of 4 toppings");
+        throw new ArgumentException("\nSorry, you can only choose a maximum of 4 toppings");
     }
 
     // Checking if user entered no toppings
@@ -1115,7 +1325,7 @@ IceCream CreateIceCream()
             string toppings = Console.ReadLine().Trim().ToLower();
             if (!toppingOptions.Contains(toppings))
             {
-                throw new ArgumentException("Please enter a valid topping.");
+                throw new ArgumentException("\nPlease enter a valid topping.");
             }
             else
             {
@@ -1124,136 +1334,6 @@ IceCream CreateIceCream()
         }
     }
     return icecream;
-}
-
-// New method to process an order
-// Receive the order in as a parameter
-void ProcessOrder(Order order)
-{
-    // Creating the variables to be used later on
-    Customer customer = customerDict[order.MemberId];
-    double totalPrice = order.CalculateTotal();
-    string membershipPoint = Convert.ToString(customer.Rewards.Points);
-
-    Console.WriteLine($"{customer.Name}'s current membership status: {customer.Rewards.Tier}");
-    Console.WriteLine($"{customer.Name}'s current membership points: {membershipPoint}\n");
-
-    // Using customer class method to check if it is the customer's birthday
-    if (customer.IsBirthday())
-    {
-        bool check = customer.OrderHistory.Any(order => order.TimeReceived.Date == DateTime.Now.Date);
-        if (check)
-        {
-            Console.WriteLine("The customer has already redeemed the free birthday ice cream");
-        }
-        else
-        {
-            // Calculate the final bill while having the most expensive ice cream cost $0.00
-            IceCream mostExpensiveIceCream = order.IceCreamList.OrderByDescending(icecream =>
-            icecream.CalculatePrice()).First();
-            totalPrice -= mostExpensiveIceCream.CalculatePrice();
-            Console.WriteLine($"It's the customer's birthday! The most expensive icecream is free of charge!");
-        }
-    }
-
-    // Checking if the birthday promotion has already been redeemed. If it has been redeemed, punch card will 
-    // remain the same
-    if (customer.Rewards.PunchCard >= 10 && !customer.IsBirthday())
-    {
-        // Set the cost of the first ice cream to $0.00
-        IceCream punchedIceCream = order.IceCreamList[0];
-        totalPrice -= punchedIceCream.CalculatePrice();
-        Console.WriteLine("Since customer's punch-card reached 10, first icecream is free!");
-
-        // Reset the punch card back to 0
-        customer.Rewards.PunchCard = 0;
-    }
-
-    // if punchcard promotion is unavailable, then just add a punch for every ice cream
-    else
-    {
-        foreach (IceCream icecream in order.IceCreamList)
-        {
-            customer.Rewards.Punch();
-        }
-
-        // Ensure that the punch card is not over 10 and to remind that next order's icecream is free
-        if (customer.Rewards.Points >= 10)
-        {
-            customer.Rewards.Points = 10;
-            Console.WriteLine("Customer will receive a free icecream next order.");
-        }
-        Console.WriteLine($"The punch-card has been updated to {customer.Rewards.Points}");
-    }
-    Console.WriteLine();
-
-    // Using a method to check if customer tier is silver or gold to redeem points
-    if (IsSilverOrGoldMember(customer) && customer.Rewards.Points > 0)
-    {
-        Console.Write("How many points would you like to redeem? ");
-        int redeemPoints = Convert.ToInt32(Console.ReadLine());
-
-        // Checking if the customer has enough points to redeem
-        if (redeemPoints <= customer.Rewards.Points)
-        {
-            // Calculate the discount based on the redeemed points and subtract it from the customer object
-            double discount = redeemPoints * 0.02;
-            customer.Rewards.RedeemPoints(redeemPoints);
-
-            // Adjust the total bill by subtracting the discount
-            totalPrice -= discount;
-
-            // Display information about redeemed points
-            Console.WriteLine($"{redeemPoints} points have been redeemed, saving ${discount:0.00}.");
-        }
-        else
-        {
-            Console.WriteLine("You don't have enough points to redeem.");
-        }
-    }
-
-    // Display the final bill amount
-    Console.WriteLine($"Your final bill amount is ${totalPrice:0.00}");
-    // Prompt user to press any key to make payment
-    Console.Write("Press any key to make payment...");
-    Console.ReadKey();
-
-    // Setting the time fulfilled to indicate order completion
-    order.TimeFulfilled = DateTime.Now;
-
-    // Calculate points based on the total amount paid
-    int earnedPoints = Convert.ToInt32(Math.Floor(totalPrice * 0.72));
-
-    // Increment customer's points
-    customer.Rewards.AddPoints(earnedPoints);
-
-    Console.WriteLine($"\nEarned Points: ");
-
-    // Check for membership tier promotions
-    if (customer.Rewards.Points >= 100 && customer.Rewards.Tier == "Gold")
-    {
-        // Customer is already a Gold member
-        Console.WriteLine("You are already a Gold member! Thank you for your continuous support!");
-    }
-    else if (customer.Rewards.Points >= 100)
-    {
-        // Promote the customer to Gold member
-        customer.Rewards.Tier = "Gold";
-        Console.WriteLine("Congratulations! You are now a Gold member.");
-    }
-    else if (customer.Rewards.Points >= 50 && customer.Rewards.Tier == "Silver")
-    {
-        // Customer is already a Silver member
-        Console.WriteLine("Congratulations! You are already a Silver member.");
-    }
-    else if (customer.Rewards.Points >= 50)
-    {
-        // Promote the customer to Silver member
-        customer.Rewards.Tier = "Silver";
-        Console.WriteLine("Congratulations! You are now a Silver member.");
-    }
-    UpdateCustomerCsvFile();
-    UpdateOrderCsvFile();
 }
 
 //New method to capitalise the string
