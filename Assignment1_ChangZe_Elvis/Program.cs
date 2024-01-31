@@ -1141,11 +1141,19 @@ void ProcessOrder(Order order)
     // Using customer class method to check if it is the customer's birthday
     if (customer.IsBirthday())
     {
-        // Calculate the final bill while having the most expensive ice cream cost $0.00
-        IceCream mostExpensiveIceCream = order.IceCreamList.OrderByDescending(icecream => 
-        icecream.CalculatePrice()).First();
-        totalPrice -= mostExpensiveIceCream.CalculatePrice();
-        Console.WriteLine($"It's the customer's birthday! The most expensive icecream is free of charge!");
+        bool check = customer.OrderHistory.Any(order => order.TimeReceived.Date == DateTime.Now.Date);
+        if (check)
+        {
+            Console.WriteLine("The customer has already redeemed the free birthday ice cream");
+        }
+        else
+        {
+            // Calculate the final bill while having the most expensive ice cream cost $0.00
+            IceCream mostExpensiveIceCream = order.IceCreamList.OrderByDescending(icecream =>
+            icecream.CalculatePrice()).First();
+            totalPrice -= mostExpensiveIceCream.CalculatePrice();
+            Console.WriteLine($"It's the customer's birthday! The most expensive icecream is free of charge!");
+        }
     }
 
     // Checking if the birthday promotion has already been redeemed. If it has been redeemed, punch card will 
