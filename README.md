@@ -1,1 +1,1 @@
-This is the PRG2 Assignment 1 done by Chang Ze and Elvis. 
+This is a rough draft of an interface for an ice cream shop that was made using C#.
